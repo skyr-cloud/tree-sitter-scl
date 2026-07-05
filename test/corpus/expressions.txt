@@ -1,0 +1,260 @@
+================
+If expression
+================
+
+if (x) 1 else 2
+
+---
+
+(source_file
+  (if_expression
+    condition: (identifier)
+    consequence: (integer)
+    alternative: (integer)))
+
+================
+If without else
+================
+
+if (x) 1
+
+---
+
+(source_file
+  (if_expression
+    condition: (identifier)
+    consequence: (integer)))
+
+================
+Let expression
+================
+
+let x = 1; x + 1
+
+---
+
+(source_file
+  (let_expression
+    (let_binding
+      name: (identifier)
+      value: (integer))
+    body: (binary_expression
+      left: (identifier)
+      right: (integer))))
+
+================
+Function expression
+================
+
+fn(x: Int, y: Int) x + y
+
+---
+
+(source_file
+  (fn_expression
+    (fn_parameters
+      (fn_parameter
+        name: (identifier)
+        type: (type_identifier))
+      (fn_parameter
+        name: (identifier)
+        type: (type_identifier)))
+    body: (binary_expression
+      left: (identifier)
+      right: (identifier))))
+
+================
+Generic function expression
+================
+
+fn<T>(x: T) x
+
+---
+
+(source_file
+  (fn_expression
+    (type_parameters
+      (type_parameter
+        name: (identifier)))
+    (fn_parameters
+      (fn_parameter
+        name: (identifier)
+        type: (type_identifier)))
+    body: (identifier)))
+
+================
+Property access
+================
+
+obj.field.nested
+
+---
+
+(source_file
+  (property_access
+    object: (property_access
+      object: (identifier)
+      property: (identifier))
+    property: (identifier)))
+
+================
+Function call
+================
+
+foo(1, 2)
+
+---
+
+(source_file
+  (call_expression
+    function: (identifier)
+    (integer)
+    (integer)))
+
+================
+Method call
+================
+
+Container.Image({ name: "test" })
+
+---
+
+(source_file
+  (call_expression
+    function: (property_access
+      object: (identifier)
+      property: (identifier))
+    (record
+      (record_field
+        name: (identifier)
+        value: (string
+          (string_content))))))
+
+================
+Indexed access
+================
+
+xs[0]
+
+---
+
+(source_file
+  (indexed_access
+    object: (identifier)
+    index: (integer)))
+
+================
+Indexed access with string key on a property
+================
+
+pod.networkAddresses["app0"]
+
+---
+
+(source_file
+  (indexed_access
+    object: (property_access
+      object: (identifier)
+      property: (identifier))
+    index: (string
+      (string_content))))
+
+================
+Chained indexed access
+================
+
+grid[i][j]
+
+---
+
+(source_file
+  (indexed_access
+    object: (indexed_access
+      object: (identifier)
+      index: (identifier))
+    index: (identifier)))
+
+================
+Indexed access on a call result
+================
+
+f(x)[0]
+
+---
+
+(source_file
+  (indexed_access
+    object: (call_expression
+      function: (identifier)
+      (identifier))
+    index: (integer)))
+
+================
+List literal after expression is not a subscript
+================
+
+xs [0]
+
+---
+
+(source_file
+  (identifier)
+  (list
+    (integer)))
+
+================
+Parenthesized expression
+================
+
+(1 + 2)
+
+---
+
+(source_file
+  (parenthesized_expression
+    (binary_expression
+      left: (integer)
+      right: (integer))))
+
+================
+Type cast
+================
+
+x as Int
+
+---
+
+(source_file
+  (type_cast
+    expression: (identifier)
+    type: (type_identifier)))
+
+================
+Type cast with optional
+================
+
+nil as Int?
+
+---
+
+(source_file
+  (type_cast
+    expression: (nil)
+    type: (optional_type
+      (type_identifier))))
+
+================
+Extern expression
+================
+
+extern "Std/Encoding.toJson": fn(Any) Str
+
+---
+
+(source_file
+  (extern_expression
+    name: (string
+      (string_content))
+    type: (fn_type
+      (type_identifier)
+      return_type: (type_identifier))))
