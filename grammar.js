@@ -197,7 +197,7 @@ module.exports = grammar({
       choice(
         seq(
           "catch",
-          field("exception", $.identifier),
+          field("exception", $._catch_target),
           "(",
           field("binding", $.identifier),
           ")",
@@ -206,10 +206,25 @@ module.exports = grammar({
         ),
         seq(
           "catch",
-          field("exception", $.identifier),
+          field("exception", $._catch_target),
           ":",
           field("body", $._expression),
         ),
+      ),
+
+    // A catch target is an identifier optionally qualified by dotted property
+    // accesses (e.g. `Option.UnexpectedNil`) — not a general expression.
+    _catch_target: ($) =>
+      choice(
+        $.identifier,
+        alias($.catch_target_access, $.property_access),
+      ),
+
+    catch_target_access: ($) =>
+      seq(
+        field("object", $._catch_target),
+        ".",
+        field("property", $.identifier),
       ),
 
     exception_expression: ($) =>

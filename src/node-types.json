@@ -605,6 +605,10 @@
           {
             "type": "identifier",
             "named": true
+          },
+          {
+            "type": "property_access",
+            "named": true
           }
         ]
       }

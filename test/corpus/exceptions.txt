@@ -73,3 +73,47 @@ try parse(input)
       exception: (identifier)
       binding: (identifier)
       body: (identifier))))
+
+================
+Try-catch with qualified target
+================
+
+try Option.unwrap(maybe)
+    catch Option.UnexpectedNil: "fallback"
+
+---
+
+(source_file
+  (try_expression
+    body: (call_expression
+      function: (property_access
+        object: (identifier)
+        property: (identifier))
+      (identifier))
+    (catch_clause
+      exception: (property_access
+        object: (identifier)
+        property: (identifier))
+      body: (string
+        (string_content)))))
+
+================
+Try-catch with qualified target and binding
+================
+
+try parse(input)
+    catch Errors.parse(msg): msg
+
+---
+
+(source_file
+  (try_expression
+    body: (call_expression
+      function: (identifier)
+      (identifier))
+    (catch_clause
+      exception: (property_access
+        object: (identifier)
+        property: (identifier))
+      binding: (identifier)
+      body: (identifier))))
