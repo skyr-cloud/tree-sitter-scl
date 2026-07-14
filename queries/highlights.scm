@@ -9,6 +9,7 @@
 "for" @keyword.repeat
 "in" @keyword
 "type" @keyword
+"enum" @keyword
 "exception" @keyword
 "raise" @keyword
 "try" @keyword
@@ -20,6 +21,10 @@
 (float) @number.float
 (boolean) @constant.builtin
 (nil) @constant.builtin
+
+; Atoms and enum variants
+(atom (identifier) @constant)
+(enum_variant (identifier) @constant)
 
 ; Paths
 (path_expression) @string.special.path

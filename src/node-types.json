@@ -1,5 +1,21 @@
 [
   {
+    "type": "atom",
+    "named": true,
+    "fields": {
+      "label": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
     "type": "binary_expression",
     "named": true,
     "fields": {
@@ -7,6 +23,10 @@
         "multiple": false,
         "required": true,
         "types": [
+          {
+            "type": "atom",
+            "named": true
+          },
           {
             "type": "binary_expression",
             "named": true
@@ -164,6 +184,10 @@
         "required": true,
         "types": [
           {
+            "type": "atom",
+            "named": true
+          },
+          {
             "type": "binary_expression",
             "named": true
           },
@@ -277,6 +301,10 @@
         "required": true,
         "types": [
           {
+            "type": "atom",
+            "named": true
+          },
+          {
             "type": "binary_expression",
             "named": true
           },
@@ -379,6 +407,10 @@
       "multiple": true,
       "required": false,
       "types": [
+        {
+          "type": "atom",
+          "named": true
+        },
         {
           "type": "binary_expression",
           "named": true
@@ -500,6 +532,10 @@
         "multiple": false,
         "required": true,
         "types": [
+          {
+            "type": "atom",
+            "named": true
+          },
           {
             "type": "binary_expression",
             "named": true
@@ -638,6 +674,10 @@
         "required": true,
         "types": [
           {
+            "type": "atom",
+            "named": true
+          },
+          {
             "type": "binary_expression",
             "named": true
           },
@@ -739,6 +779,10 @@
         "multiple": false,
         "required": true,
         "types": [
+          {
+            "type": "atom",
+            "named": true
+          },
           {
             "type": "binary_expression",
             "named": true
@@ -852,6 +896,10 @@
             "named": true
           },
           {
+            "type": "enum_type",
+            "named": true
+          },
+          {
             "type": "fn_type",
             "named": true
           },
@@ -886,6 +934,10 @@
             "named": true
           },
           {
+            "type": "enum_type",
+            "named": true
+          },
+          {
             "type": "fn_type",
             "named": true
           },
@@ -914,6 +966,37 @@
     }
   },
   {
+    "type": "enum_type",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "enum_variant",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "enum_variant",
+    "named": true,
+    "fields": {
+      "label": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
     "type": "exception_expression",
     "named": true,
     "fields": {},
@@ -923,6 +1006,10 @@
       "types": [
         {
           "type": "dict_type",
+          "named": true
+        },
+        {
+          "type": "enum_type",
           "named": true
         },
         {
@@ -1005,6 +1092,10 @@
             "named": true
           },
           {
+            "type": "enum_type",
+            "named": true
+          },
+          {
             "type": "fn_type",
             "named": true
           },
@@ -1040,6 +1131,10 @@
         "multiple": false,
         "required": true,
         "types": [
+          {
+            "type": "atom",
+            "named": true
+          },
           {
             "type": "binary_expression",
             "named": true
@@ -1177,6 +1272,10 @@
             "named": true
           },
           {
+            "type": "enum_type",
+            "named": true
+          },
+          {
             "type": "fn_type",
             "named": true
           },
@@ -1232,6 +1331,10 @@
             "named": true
           },
           {
+            "type": "enum_type",
+            "named": true
+          },
+          {
             "type": "fn_type",
             "named": true
           },
@@ -1264,6 +1367,10 @@
       "types": [
         {
           "type": "dict_type",
+          "named": true
+        },
+        {
+          "type": "enum_type",
           "named": true
         },
         {
@@ -1305,6 +1412,10 @@
         "multiple": false,
         "required": false,
         "types": [
+          {
+            "type": "atom",
+            "named": true
+          },
           {
             "type": "binary_expression",
             "named": true
@@ -1408,6 +1519,10 @@
         "required": true,
         "types": [
           {
+            "type": "atom",
+            "named": true
+          },
+          {
             "type": "binary_expression",
             "named": true
           },
@@ -1509,6 +1624,10 @@
         "multiple": false,
         "required": true,
         "types": [
+          {
+            "type": "atom",
+            "named": true
+          },
           {
             "type": "binary_expression",
             "named": true
@@ -1659,6 +1778,10 @@
         "required": true,
         "types": [
           {
+            "type": "atom",
+            "named": true
+          },
+          {
             "type": "binary_expression",
             "named": true
           },
@@ -1760,6 +1883,10 @@
         "multiple": false,
         "required": true,
         "types": [
+          {
+            "type": "atom",
+            "named": true
+          },
           {
             "type": "binary_expression",
             "named": true
@@ -1868,6 +1995,10 @@
       "multiple": false,
       "required": true,
       "types": [
+        {
+          "type": "atom",
+          "named": true
+        },
         {
           "type": "binary_expression",
           "named": true
@@ -1990,6 +2121,10 @@
             "named": true
           },
           {
+            "type": "enum_type",
+            "named": true
+          },
+          {
             "type": "fn_type",
             "named": true
           },
@@ -2019,6 +2154,10 @@
         "multiple": false,
         "required": true,
         "types": [
+          {
+            "type": "atom",
+            "named": true
+          },
           {
             "type": "binary_expression",
             "named": true
@@ -2127,6 +2266,10 @@
         "multiple": false,
         "required": true,
         "types": [
+          {
+            "type": "atom",
+            "named": true
+          },
           {
             "type": "binary_expression",
             "named": true
@@ -2246,6 +2389,10 @@
       "required": false,
       "types": [
         {
+          "type": "atom",
+          "named": true
+        },
+        {
           "type": "binary_expression",
           "named": true
         },
@@ -2361,6 +2508,10 @@
         "required": true,
         "types": [
           {
+            "type": "atom",
+            "named": true
+          },
+          {
             "type": "binary_expression",
             "named": true
           },
@@ -2470,6 +2621,10 @@
         "multiple": false,
         "required": true,
         "types": [
+          {
+            "type": "atom",
+            "named": true
+          },
           {
             "type": "binary_expression",
             "named": true
@@ -2589,6 +2744,10 @@
         "required": true,
         "types": [
           {
+            "type": "atom",
+            "named": true
+          },
+          {
             "type": "binary_expression",
             "named": true
           },
@@ -2698,6 +2857,10 @@
         "multiple": false,
         "required": true,
         "types": [
+          {
+            "type": "atom",
+            "named": true
+          },
           {
             "type": "binary_expression",
             "named": true
@@ -2811,6 +2974,10 @@
           "named": true
         },
         {
+          "type": "enum_type",
+          "named": true
+        },
+        {
           "type": "fn_type",
           "named": true
         },
@@ -2850,6 +3017,10 @@
           "named": true
         },
         {
+          "type": "enum_type",
+          "named": true
+        },
+        {
           "type": "fn_type",
           "named": true
         },
@@ -2880,6 +3051,10 @@
       "multiple": false,
       "required": true,
       "types": [
+        {
+          "type": "atom",
+          "named": true
+        },
         {
           "type": "binary_expression",
           "named": true
@@ -2992,6 +3167,10 @@
         "multiple": false,
         "required": true,
         "types": [
+          {
+            "type": "atom",
+            "named": true
+          },
           {
             "type": "binary_expression",
             "named": true
@@ -3110,6 +3289,10 @@
         "multiple": false,
         "required": true,
         "types": [
+          {
+            "type": "atom",
+            "named": true
+          },
           {
             "type": "binary_expression",
             "named": true
@@ -3243,6 +3426,10 @@
         "multiple": false,
         "required": false,
         "types": [
+          {
+            "type": "atom",
+            "named": true
+          },
           {
             "type": "binary_expression",
             "named": true
@@ -3381,6 +3568,10 @@
             "named": true
           },
           {
+            "type": "enum_type",
+            "named": true
+          },
+          {
             "type": "fn_type",
             "named": true
           },
@@ -3417,6 +3608,10 @@
       "multiple": true,
       "required": false,
       "types": [
+        {
+          "type": "atom",
+          "named": true
+        },
         {
           "type": "binary_expression",
           "named": true
@@ -3564,6 +3759,10 @@
         "required": true,
         "types": [
           {
+            "type": "atom",
+            "named": true
+          },
+          {
             "type": "binary_expression",
             "named": true
           },
@@ -3686,6 +3885,10 @@
           "named": true
         },
         {
+          "type": "enum_type",
+          "named": true
+        },
+        {
           "type": "fn_type",
           "named": true
         },
@@ -3720,6 +3923,10 @@
         "multiple": false,
         "required": true,
         "types": [
+          {
+            "type": "atom",
+            "named": true
+          },
           {
             "type": "binary_expression",
             "named": true
@@ -3827,6 +4034,10 @@
             "named": true
           },
           {
+            "type": "enum_type",
+            "named": true
+          },
+          {
             "type": "fn_type",
             "named": true
           },
@@ -3877,6 +4088,10 @@
             "named": true
           },
           {
+            "type": "enum_type",
+            "named": true
+          },
+          {
             "type": "fn_type",
             "named": true
           },
@@ -3924,6 +4139,10 @@
         "types": [
           {
             "type": "dict_type",
+            "named": true
+          },
+          {
+            "type": "enum_type",
             "named": true
           },
           {
@@ -3992,6 +4211,10 @@
           "named": true
         },
         {
+          "type": "enum_type",
+          "named": true
+        },
+        {
           "type": "fn_type",
           "named": true
         },
@@ -4022,6 +4245,10 @@
         "multiple": false,
         "required": true,
         "types": [
+          {
+            "type": "atom",
+            "named": true
+          },
           {
             "type": "binary_expression",
             "named": true
@@ -4251,6 +4478,10 @@
   },
   {
     "type": "else",
+    "named": false
+  },
+  {
+    "type": "enum",
     "named": false
   },
   {

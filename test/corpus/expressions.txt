@@ -258,3 +258,48 @@ extern "Std/Encoding.toJson": fn(Any) Str
     type: (fn_type
       (type_identifier)
       return_type: (type_identifier))))
+
+================================================================================
+Atom literal
+================================================================================
+
+let mode = .prod
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (let_binding
+    name: (identifier)
+    value: (atom
+      label: (identifier))))
+
+================================================================================
+Atoms as call arguments
+================================================================================
+
+let x = f(.a, .b)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (let_binding
+    name: (identifier)
+    value: (call_expression
+      function: (identifier)
+      (atom
+        label: (identifier))
+      (atom
+        label: (identifier)))))
+
+================================================================================
+Property access wins over atom
+================================================================================
+
+x.name
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_access
+    object: (identifier)
+    property: (identifier)))

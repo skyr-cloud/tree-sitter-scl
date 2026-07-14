@@ -246,10 +246,17 @@ module.exports = grammar({
         $.integer,
         $.boolean,
         $.nil,
+        $.atom,
         $.exception_expression,
         $.path_expression,
         $.identifier,
       ),
+
+    // An atom literal `.name`: a leading dot heading a variant label. Property
+    // access wins where a leading dot is ambiguous, so an atom is recognised
+    // only at the head of a primary expression; after a preceding expression
+    // the `.name` is a `property_access` instead.
+    atom: ($) => seq(".", field("label", $.identifier)),
 
     parenthesized_expression: ($) => seq("(", $._expression, ")"),
 
@@ -346,10 +353,17 @@ module.exports = grammar({
         $.fn_type,
         $.dict_type,
         $.record_type,
+        $.enum_type,
         $.list_type,
         $.type_property_access,
         alias($.identifier, $.type_identifier),
       ),
+
+    // An enum type `enum { .a, .b }`: the `enum` keyword and a brace-delimited,
+    // comma-separated list of `.variant` labels (trailing comma allowed).
+    enum_type: ($) => seq("enum", "{", commaSep1($.enum_variant), "}"),
+
+    enum_variant: ($) => seq(".", field("label", $.identifier)),
 
     list_type: ($) => seq("[", $._type_expression, "]"),
 

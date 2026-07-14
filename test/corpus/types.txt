@@ -107,3 +107,39 @@ fn(cfg: MyLib.Config) cfg
           (type_identifier)
           (type_identifier))))
     body: (identifier)))
+
+================================================================================
+Enum type annotation with atom value
+================================================================================
+
+let m: enum { .dev, .prod } = .dev
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (let_binding
+    name: (identifier)
+    type: (enum_type
+      (enum_variant
+        label: (identifier))
+      (enum_variant
+        label: (identifier)))
+    value: (atom
+      label: (identifier))))
+
+================================================================================
+Enum type with trailing comma
+================================================================================
+
+type Mode enum { .a, .b, }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (type_declaration
+    name: (identifier)
+    type: (enum_type
+      (enum_variant
+        label: (identifier))
+      (enum_variant
+        label: (identifier)))))
