@@ -1,0 +1,110 @@
+================================================================================
+Switch with variant patterns
+================================================================================
+
+switch mode
+	case .dev: "d"
+	case .prod: "p"
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (switch_expression
+    subject: (identifier)
+    (case_clause
+      pattern: (variant_pattern
+        label: (identifier))
+      body: (string
+        (string_content)))
+    (case_clause
+      pattern: (variant_pattern
+        label: (identifier))
+      body: (string
+        (string_content)))))
+
+================================================================================
+Switch with a payload binder and a wildcard slot
+================================================================================
+
+switch list
+	case .cons(first, _): first
+	case .empty: 0
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (switch_expression
+    subject: (identifier)
+    (case_clause
+      pattern: (variant_pattern
+        label: (identifier)
+        (pattern_payload
+          (binding_pattern
+            name: (identifier))
+          (wildcard_pattern)))
+      body: (identifier))
+    (case_clause
+      pattern: (variant_pattern
+        label: (identifier))
+      body: (integer))))
+
+================================================================================
+Switch with a nested variant pattern, nil, and a binder
+================================================================================
+
+switch v
+	case .wrap(.some(n)): n
+	case nil: 0
+	case other: 1
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (switch_expression
+    subject: (identifier)
+    (case_clause
+      pattern: (variant_pattern
+        label: (identifier)
+        (pattern_payload
+          (variant_pattern
+            label: (identifier)
+            (pattern_payload
+              (binding_pattern
+                name: (identifier))))))
+      body: (identifier))
+    (case_clause
+      pattern: (nil_pattern)
+      body: (integer))
+    (case_clause
+      pattern: (binding_pattern
+        name: (identifier))
+      body: (integer))))
+
+================================================================================
+Switch on a non-enum subject with an irrefutable arm
+================================================================================
+
+switch 21
+	case n: n
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (switch_expression
+    subject: (integer)
+    (case_clause
+      pattern: (binding_pattern
+        name: (identifier))
+      body: (identifier))))
+
+================================================================================
+Zero-case switch (absurd elimination)
+================================================================================
+
+switch x
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (switch_expression
+    subject: (identifier)))

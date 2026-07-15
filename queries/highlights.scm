@@ -14,6 +14,8 @@
 "raise" @keyword
 "try" @keyword
 "catch" @keyword
+"switch" @keyword.conditional
+"case" @keyword.conditional
 "as" @keyword
 
 ; Literals
@@ -22,9 +24,15 @@
 (boolean) @constant.builtin
 (nil) @constant.builtin
 
-; Atoms and enum variants
-(atom (identifier) @constant)
-(enum_variant (identifier) @constant)
+; Atoms and enum variants (the label only; payloads highlight as their own kind)
+(atom label: (identifier) @constant)
+(enum_variant label: (identifier) @constant)
+
+; Switch patterns
+(variant_pattern label: (identifier) @constant)
+(nil_pattern) @constant.builtin
+(wildcard_pattern) @variable.builtin
+(binding_pattern name: (identifier) @variable)
 
 ; Paths
 (path_expression) @string.special.path

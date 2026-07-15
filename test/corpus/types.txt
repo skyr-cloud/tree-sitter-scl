@@ -143,3 +143,46 @@ type Mode enum { .a, .b, }
         label: (identifier))
       (enum_variant
         label: (identifier)))))
+
+================================================================================
+Tagged enum type with payload variants
+================================================================================
+
+type Status enum { .active(Int), .idle, .error(Str) }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (type_declaration
+    name: (identifier)
+    type: (enum_type
+      (enum_variant
+        label: (identifier)
+        (enum_variant_payload
+          (type_identifier)))
+      (enum_variant
+        label: (identifier))
+      (enum_variant
+        label: (identifier)
+        (enum_variant_payload
+          (type_identifier))))))
+
+================================================================================
+Recursive tagged enum type
+================================================================================
+
+type List enum { .cons(Int, List), .empty }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (type_declaration
+    name: (identifier)
+    type: (enum_type
+      (enum_variant
+        label: (identifier)
+        (enum_variant_payload
+          (type_identifier)
+          (type_identifier)))
+      (enum_variant
+        label: (identifier)))))

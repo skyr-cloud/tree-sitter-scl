@@ -2,6 +2,7 @@
 (fn_expression) @local.scope
 (let_expression) @local.scope
 (list_for_item) @local.scope
+(case_clause) @local.scope
 
 ; Definitions
 (let_binding
@@ -12,6 +13,8 @@
   variable: (identifier) @local.definition)
 (catch_clause
   binding: (identifier) @local.definition)
+(binding_pattern
+  name: (identifier) @local.definition)
 
 ; References
 (identifier) @local.reference

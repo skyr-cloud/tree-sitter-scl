@@ -303,3 +303,38 @@ x.name
   (property_access
     object: (identifier)
     property: (identifier)))
+
+================================================================================
+Tagged atom literal
+================================================================================
+
+let tagged = .ok(1, "hi")
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (let_binding
+    name: (identifier)
+    value: (atom
+      label: (identifier)
+      (atom_payload
+        (integer)
+        (string
+          (string_content))))))
+
+================================================================================
+Nested tagged atom
+================================================================================
+
+let nested = .wrap(.inner)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (let_binding
+    name: (identifier)
+    value: (atom
+      label: (identifier)
+      (atom_payload
+        (atom
+          label: (identifier))))))

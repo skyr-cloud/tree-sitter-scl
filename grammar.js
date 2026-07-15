@@ -88,6 +88,7 @@ module.exports = grammar({
         $.extern_expression,
         $.raise_expression,
         $.try_expression,
+        $.switch_expression,
         $.binary_expression,
         $.unary_expression,
         $.type_cast,
@@ -212,6 +213,51 @@ module.exports = grammar({
         ),
       ),
 
+    // A `switch` pairs a subject expression with zero or more `case` clauses.
+    // The subject expression extends rightward until the first `case` keyword;
+    // zero clauses is legal (its validity is a coverage question). Mirrors the
+    // right-associative shape of `try`/`catch`.
+    switch_expression: ($) =>
+      prec.right(seq(
+        "switch",
+        field("subject", $._expression),
+        repeat($.case_clause),
+      )),
+
+    case_clause: ($) =>
+      seq(
+        "case",
+        field("pattern", $._pattern),
+        ":",
+        field("body", $._expression),
+      ),
+
+    // The v1 pattern set: a variant pattern `.name(<pat>, …)`, a `nil` pattern,
+    // a wildcard `_`, and a variable binding. Deferred forms (literals, ranges,
+    // list/cons, @-bindings, guards) are rejected by the reference parser and
+    // are not modelled here.
+    _pattern: ($) =>
+      choice(
+        $.variant_pattern,
+        $.nil_pattern,
+        $.wildcard_pattern,
+        $.binding_pattern,
+      ),
+
+    // A variant pattern `.name` or `.name(<pat>, …)`. The payload pattern list
+    // binds to the label in the pattern production, exactly as a tagged atom's
+    // payload binds in the atom production.
+    variant_pattern: ($) =>
+      seq(".", field("label", $.identifier), optional($.pattern_payload)),
+
+    pattern_payload: ($) => seq("(", commaSep1($._pattern), ")"),
+
+    wildcard_pattern: ($) => "_",
+
+    nil_pattern: ($) => "nil",
+
+    binding_pattern: ($) => field("name", $.identifier),
+
     // A catch target is an identifier optionally qualified by dotted property
     // accesses (e.g. `Option.UnexpectedNil`) — not a general expression.
     _catch_target: ($) =>
@@ -252,11 +298,17 @@ module.exports = grammar({
         $.identifier,
       ),
 
-    // An atom literal `.name`: a leading dot heading a variant label. Property
-    // access wins where a leading dot is ambiguous, so an atom is recognised
-    // only at the head of a primary expression; after a preceding expression
-    // the `.name` is a `property_access` instead.
-    atom: ($) => seq(".", field("label", $.identifier)),
+    // An atom literal `.name`, optionally carrying a positional payload
+    // `.name(e1, …, en)` (a tagged atom). Property access wins where a leading
+    // dot is ambiguous, so an atom is recognised only at the head of a primary
+    // expression; after a preceding expression the `.name` is a
+    // `property_access` instead. The payload arg list binds to the label in the
+    // atom production (not as a call on the atom, which is not callable), so it
+    // takes precedence over reading `.name` as a call target.
+    atom: ($) =>
+      prec.right(PREC.POSTFIX + 1, seq(".", field("label", $.identifier), optional($.atom_payload))),
+
+    atom_payload: ($) => seq("(", commaSep1($._expression), ")"),
 
     parenthesized_expression: ($) => seq("(", $._expression, ")"),
 
@@ -360,10 +412,14 @@ module.exports = grammar({
       ),
 
     // An enum type `enum { .a, .b }`: the `enum` keyword and a brace-delimited,
-    // comma-separated list of `.variant` labels (trailing comma allowed).
+    // comma-separated list of `.variant` labels (trailing comma allowed). A
+    // variant may carry a positional payload type list, `.tag(T1, …, Tk)`.
     enum_type: ($) => seq("enum", "{", commaSep1($.enum_variant), "}"),
 
-    enum_variant: ($) => seq(".", field("label", $.identifier)),
+    enum_variant: ($) =>
+      seq(".", field("label", $.identifier), optional($.enum_variant_payload)),
+
+    enum_variant_payload: ($) => seq("(", commaSep1($._type_expression), ")"),
 
     list_type: ($) => seq("[", $._type_expression, "]"),
 
