@@ -51,6 +51,9 @@ module.exports = grammar({
     ...bothFlavors($, ["binary_expression", "unary_expression", "call_expression"]),
     ...bothFlavors($, ["binary_expression", "call_expression"]),
     [$._atom_expression, $._type_expression_base],
+    // An untyped parameter makes `fn(a, …` ambiguous between a `fn` expression
+    // and a `fn` type until the closing paren's continuation settles it.
+    [$.fn_parameter, $._type_expression_base],
     [$.record, $.record_type],
     [$.if_expression, $._list_item],
     [$.binary_expression, $.path_expression],
@@ -164,8 +167,11 @@ module.exports = grammar({
 
     fn_parameters: ($) => commaSep1($.fn_parameter),
 
+    // A parameter's type annotation is optional: an untyped parameter is legal
+    // wherever an expectation supplies its type, as in `fn(x) x + 1` checked
+    // against `fn(Int) Int`.
     fn_parameter: ($) =>
-      seq(field("name", $.identifier), ":", field("type", $._type_expression)),
+      seq(field("name", $.identifier), optional(seq(":", field("type", $._type_expression)))),
 
     extern_expression: ($) =>
       seq("extern", field("name", $.string), ":", field("type", $._type_expression)),

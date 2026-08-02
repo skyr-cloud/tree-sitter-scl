@@ -64,6 +64,40 @@ fn(x: Int, y: Int) x + y
       right: (identifier))))
 
 ================
+Function expression with untyped parameters
+================
+
+let increment: fn(Int) Int = fn(x) x + 1
+export let pick = fn(x, y: Int) x
+
+---
+
+(source_file
+  (let_binding
+    name: (identifier)
+    type: (fn_type
+      (type_identifier)
+      return_type: (type_identifier))
+    value: (fn_expression
+      (fn_parameters
+        (fn_parameter
+          name: (identifier)))
+      body: (binary_expression
+        left: (identifier)
+        right: (integer))))
+  (export_statement
+    (let_binding
+      name: (identifier)
+      value: (fn_expression
+        (fn_parameters
+          (fn_parameter
+            name: (identifier))
+          (fn_parameter
+            name: (identifier)
+            type: (type_identifier)))
+        body: (identifier)))))
+
+================
 Generic function expression
 ================
 
