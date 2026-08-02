@@ -239,6 +239,108 @@ export let x = try (A(); B()) catch E(e): c
           body: (identifier))))))
 
 ================
+A reserved if body stops at the binding's semicolon
+================
+
+let x = if (c) A(); rest
+
+---
+
+(source_file
+  (let_expression
+    (let_binding
+      name: (identifier)
+      value: (if_expression
+        condition: (identifier)
+        consequence: (call_expression
+          function: (identifier))))
+    body: (identifier)))
+
+================
+A reserved fn body stops at the binding's semicolon
+================
+
+let f = fn(n: Int) n; f(1)
+
+---
+
+(source_file
+  (let_expression
+    (let_binding
+      name: (identifier)
+      value: (fn_expression
+        (fn_parameters
+          (fn_parameter
+            name: (identifier)
+            type: (type_identifier)))
+        body: (identifier)))
+    body: (call_expression
+      function: (identifier)
+      (integer))))
+
+================
+A reserved raise operand stops at the binding's semicolon
+================
+
+let x = raise E("m"); rest
+
+---
+
+(source_file
+  (let_expression
+    (let_binding
+      name: (identifier)
+      value: (raise_expression
+        value: (call_expression
+          function: (identifier)
+          (string
+            (string_content)))))
+    body: (identifier)))
+
+================
+A reserved case arm stops at the binding's semicolon
+================
+
+let x = switch s case .a: A(); rest
+
+---
+
+(source_file
+  (let_expression
+    (let_binding
+      name: (identifier)
+      value: (switch_expression
+        subject: (identifier)
+        (case_clause
+          pattern: (variant_pattern
+            label: (identifier))
+          body: (call_expression
+            function: (identifier)))))
+    body: (identifier)))
+
+================
+A reserved catch body stops at the binding's semicolon
+================
+
+let x = try A() catch E(e): B(); rest
+
+---
+
+(source_file
+  (let_expression
+    (let_binding
+      name: (identifier)
+      value: (try_expression
+        body: (call_expression
+          function: (identifier))
+        (catch_clause
+          exception: (identifier)
+          binding: (identifier)
+          body: (call_expression
+            function: (identifier)))))
+    body: (identifier)))
+
+================
 A bare let at module level is an inline let expression
 ================
 
@@ -257,6 +359,7 @@ let x = A(); B()
 
 ================
 A semicolon after a declaration is an error
+:error
 ================
 
 export let x = A(); B()
@@ -269,11 +372,11 @@ export let x = A(); B()
       name: (identifier)
       value: (call_expression
         function: (identifier))))
-  (ERROR
-    (string_content)))
+  (ERROR))
 
 ================
 A keyword-bounded body inside a declaration stays reserved
+:error
 ================
 
 export let x = if (c) A(); B()
@@ -288,5 +391,4 @@ export let x = if (c) A(); B()
         condition: (identifier)
         consequence: (call_expression
           function: (identifier)))))
-  (ERROR
-    (string_content)))
+  (ERROR))
