@@ -1,15 +1,41 @@
 /// <reference types="tree-sitter-cli/dsl" />
 
 const PREC = {
-  OR: 1,
-  AND: 2,
-  EQUALITY: 3,
-  COMPARISON: 4,
-  ADDITIVE: 5,
-  MULTIPLICATIVE: 6,
-  UNARY: 7,
-  POSTFIX: 8,
+  // The discard operator `;` is the lowest level: a chain is a whole
+  // expression, never an operand of one. Its precedence only has to beat
+  // reducing a bare sub-discard expression to `_expression`, so that a `;`
+  // reached in an ordinary position starts a chain instead of ending one.
+  DISCARD: 1,
+  OR: 2,
+  AND: 3,
+  EQUALITY: 4,
+  COMPARISON: 5,
+  ADDITIVE: 6,
+  MULTIPLICATIVE: 7,
+  UNARY: 8,
+  POSTFIX: 9,
 };
+
+// The expression rules that exist in two flavors — see the "Expressions"
+// comment below. The reserved twin of `foo` is the hidden rule
+// `_reserved_foo`, aliased back to `foo` wherever it is used.
+const FLAVORED = [
+  "_core_expression",
+  "if_expression",
+  "let_expression",
+  "fn_expression",
+  "raise_expression",
+  "try_expression",
+  "catch_clause",
+  "switch_expression",
+  "case_clause",
+  "binary_expression",
+  "unary_expression",
+  "type_cast",
+  "call_expression",
+  "property_access",
+  "indexed_access",
+];
 
 module.exports = grammar({
   name: "scl",
@@ -21,8 +47,8 @@ module.exports = grammar({
   externals: ($) => [$.string_content],
 
   conflicts: ($) => [
-    [$.binary_expression, $.unary_expression, $.call_expression],
-    [$.binary_expression, $.call_expression],
+    ...bothFlavors($, ["binary_expression", "unary_expression", "call_expression"]),
+    ...bothFlavors($, ["binary_expression", "call_expression"]),
     [$._atom_expression, $._type_expression_base],
     [$.record, $.record_type],
     [$.if_expression, $._list_item],
@@ -34,13 +60,16 @@ module.exports = grammar({
 
     source_file: ($) => repeat($._mod_stmt),
 
+    // A module statement has no terminator token — statements are delimited by
+    // juxtaposition — so statement level is a reservation context: a `;`
+    // written after one would otherwise pull the following statement into it.
     _mod_stmt: ($) =>
       choice(
         $.import_statement,
         $.export_type_declaration,
         $.export_statement,
         $.type_declaration,
-        $._expression,
+        $._reserved_core_expression,
         $.let_binding,
       ),
 
@@ -63,8 +92,11 @@ module.exports = grammar({
     import_fragment: ($) =>
       token(/[a-zA-Z_][a-zA-Z0-9_]*(-(0|[1-9][0-9]*)?[a-zA-Z_][a-zA-Z0-9_]*)*/),
 
+    // A binding's value is always a reservation context: the `;` that may
+    // follow it closes the binding (inline `let`) or is an error (module-level
+    // declaration) — it is never the binding's own discard operator.
     let_binding: ($) =>
-      seq("let", field("name", $.identifier), optional(seq(":", field("type", $._type_expression))), "=", field("value", $._expression)),
+      seq("let", field("name", $.identifier), optional(seq(":", field("type", $._type_expression))), "=", field("value", $._reserved_core_expression)),
 
     export_statement: ($) => seq("export", $.let_binding),
 
@@ -79,102 +111,55 @@ module.exports = grammar({
     export_type_declaration: ($) => seq("export", $.type_declaration),
 
     // ── Expressions ────────────────────────────────────────────
+    //
+    // The discard operator `;` evaluates both operands, drops the left one's
+    // value and yields the right one's. It is the lowest precedence level and
+    // right-associative, so `a; b; c` is `a; (b; c)`.
+    //
+    // Because every keyword-headed construct's trailing body is itself an
+    // expression, the expression grammar comes in two flavors:
+    //
+    //   ordinary — `;` is the discard operator, and a trailing body extends
+    //     through it: `if (c) A(); B()` puts `B()` inside the then-branch, and
+    //     `fn(n: Int) n; n * 2` is one function whose body is the chain.
+    //
+    //   reserved — an unparenthesised `;` belongs to an enclosing construct, so
+    //     no body may consume it. The two reservation contexts are a `let`
+    //     binding's value, whose `;` closes the binding, and module-statement
+    //     level, which has no terminator at all. The reservation propagates
+    //     down the rightward spine — the trailing bodies of `if`, `fn`,
+    //     `raise`, `try`, `switch` and of a nested `let` — so a nested body
+    //     cannot eat the `;` its enclosing binding requires. That is what keeps
+    //     `let x = if (c) v else raise E("…"); rest` parsing as a binding
+    //     followed by `rest`, and what makes a stray `;` at module level an
+    //     error rather than a silent glue between two statements.
+    //
+    // Ownership is inside-out: each unparenthesised `;` on a reserved spine is
+    // claimed by the innermost construct still awaiting a required separator of
+    // its own (a `let` awaiting its `;`), and the first one nothing claims ends
+    // the reserved region. Bracketing delimiters — parentheses, brackets,
+    // argument lists, indices, interpolations, collection members, the
+    // parenthesised `if` condition — reset to the ordinary flavor, so
+    // `let x = (A(); B()); rest` and `f(a; b)` chain anywhere. Positions bounded
+    // only by a keyword (a then-branch before `else`, a non-final `case` arm, a
+    // `try` body before `catch`) stay reserved; parenthesise to chain there.
+    //
+    // Both flavors are generated from one description by `expressionFlavor()`
+    // below. Each reserved twin is a hidden rule aliased back to its ordinary
+    // node name, so highlighting, indentation and textobject queries see a
+    // single node type either way.
 
-    _expression: ($) =>
-      choice(
-        $.if_expression,
-        $.let_expression,
-        $.fn_expression,
-        $.extern_expression,
-        $.raise_expression,
-        $.try_expression,
-        $.switch_expression,
-        $.binary_expression,
-        $.unary_expression,
-        $.type_cast,
-        $.call_expression,
-        $.property_access,
-        $.indexed_access,
-        $._atom_expression,
-      ),
+    _expression: ($) => choice($.discard_expression, $._core_expression),
 
-    binary_expression: ($) =>
-      choice(
-        prec.left(PREC.OR, seq(field("left", $._expression), field("operator", "||"), field("right", $._expression))),
-        prec.left(PREC.AND, seq(field("left", $._expression), field("operator", "&&"), field("right", $._expression))),
-        prec.left(PREC.EQUALITY, seq(field("left", $._expression), field("operator", "=="), field("right", $._expression))),
-        prec.left(PREC.EQUALITY, seq(field("left", $._expression), field("operator", "!="), field("right", $._expression))),
-        prec.left(PREC.COMPARISON, seq(field("left", $._expression), field("operator", "<"), field("right", $._expression))),
-        prec.left(PREC.COMPARISON, seq(field("left", $._expression), field("operator", "<="), field("right", $._expression))),
-        prec.left(PREC.COMPARISON, seq(field("left", $._expression), field("operator", ">"), field("right", $._expression))),
-        prec.left(PREC.COMPARISON, seq(field("left", $._expression), field("operator", ">="), field("right", $._expression))),
-        prec.left(PREC.ADDITIVE, seq(field("left", $._expression), field("operator", "+"), field("right", $._expression))),
-        prec.left(PREC.ADDITIVE, seq(field("left", $._expression), field("operator", "-"), field("right", $._expression))),
-        prec.left(PREC.MULTIPLICATIVE, seq(field("left", $._expression), field("operator", "*"), field("right", $._expression))),
-        prec.left(PREC.MULTIPLICATIVE, seq(field("left", $._expression), field("operator", "/"), field("right", $._expression))),
-      ),
-
-    unary_expression: ($) =>
-      prec(PREC.UNARY, seq(field("operator", choice("-", "!")), field("operand", $._expression))),
-
-    type_cast: ($) =>
-      prec.left(PREC.POSTFIX, seq(
-        field("expression", $._expression),
-        "as",
-        field("type", $._type_expression),
+    discard_expression: ($) =>
+      prec.right(PREC.DISCARD, seq(
+        field("left", $._core_expression),
+        ";",
+        field("right", $._expression),
       )),
 
-    property_access: ($) =>
-      prec.left(PREC.POSTFIX, seq(
-        field("object", $._expression),
-        ".",
-        field("property", $.identifier),
-      )),
-
-    call_expression: ($) =>
-      prec.left(PREC.POSTFIX, seq(
-        field("function", $._expression),
-        optional($.type_arguments),
-        "(",
-        optional(commaSep1($._expression)),
-        ")",
-      )),
-
-    // Subscript / indexing: `expr[index]`. The opening bracket is matched with
-    // `token.immediate` so it only attaches when it directly follows the
-    // preceding expression with no intervening whitespace — this disambiguates
-    // a subscript from a fresh list literal in statement position (mirroring
-    // the reference parser's adjacency requirement).
-    indexed_access: ($) =>
-      prec.left(PREC.POSTFIX, seq(
-        field("object", $._expression),
-        token.immediate("["),
-        field("index", $._expression),
-        "]",
-      )),
-
-    if_expression: ($) =>
-      prec.right(seq(
-        "if",
-        "(",
-        field("condition", $._expression),
-        ")",
-        field("consequence", $._expression),
-        optional(seq("else", field("alternative", $._expression))),
-      )),
-
-    let_expression: ($) =>
-      seq($.let_binding, ";", field("body", $._expression)),
-
-    fn_expression: ($) =>
-      prec.right(seq(
-        "fn",
-        optional($.type_parameters),
-        "(",
-        optional($.fn_parameters),
-        ")",
-        field("body", $._expression),
-      )),
+    ...expressionFlavor(false),
+    ...expressionFlavor(true),
 
     fn_parameters: ($) => commaSep1($.fn_parameter),
 
@@ -183,54 +168,6 @@ module.exports = grammar({
 
     extern_expression: ($) =>
       seq("extern", field("name", $.string), ":", field("type", $._type_expression)),
-
-    raise_expression: ($) =>
-      prec.right(seq("raise", field("value", $._expression))),
-
-    try_expression: ($) =>
-      prec.right(seq(
-        "try",
-        field("body", $._expression),
-        repeat1($.catch_clause),
-      )),
-
-    catch_clause: ($) =>
-      choice(
-        seq(
-          "catch",
-          field("exception", $._catch_target),
-          "(",
-          field("binding", $.identifier),
-          ")",
-          ":",
-          field("body", $._expression),
-        ),
-        seq(
-          "catch",
-          field("exception", $._catch_target),
-          ":",
-          field("body", $._expression),
-        ),
-      ),
-
-    // A `switch` pairs a subject expression with zero or more `case` clauses.
-    // The subject expression extends rightward until the first `case` keyword;
-    // zero clauses is legal (its validity is a coverage question). Mirrors the
-    // right-associative shape of `try`/`catch`.
-    switch_expression: ($) =>
-      prec.right(seq(
-        "switch",
-        field("subject", $._expression),
-        repeat($.case_clause),
-      )),
-
-    case_clause: ($) =>
-      seq(
-        "case",
-        field("pattern", $._pattern),
-        ":",
-        field("body", $._expression),
-      ),
 
     // The v1 pattern set: a variant pattern `.name(<pat>, …)`, a `nil` pattern,
     // a wildcard `_`, and a variable binding. Deferred forms (literals, ranges,
@@ -496,4 +433,199 @@ module.exports = grammar({
  */
 function commaSep1(rule) {
   return seq(rule, repeat(seq(",", rule)), optional(","));
+}
+
+/**
+ * The rule name a flavored rule is defined under.
+ */
+function flavorName(base, reserved) {
+  return reserved ? `_reserved_${base.replace(/^_/, "")}` : base;
+}
+
+/**
+ * The raw symbol of a rule in the given flavor, un-aliased — for `conflicts`,
+ * which names rules rather than nodes.
+ */
+function flavorSymbol($, base, reserved) {
+  return $[FLAVORED.includes(base) ? flavorName(base, reserved) : base];
+}
+
+/**
+ * A conflict declared once per flavor.
+ */
+function bothFlavors($, bases) {
+  return [false, true].map((reserved) =>
+    bases.map((base) => flavorSymbol($, base, reserved)),
+  );
+}
+
+/**
+ * One flavor of the expression grammar — see the "Expressions" comment above.
+ * The two flavors differ only in what a trailing body may be, but a body sits
+ * at the far end of a rightward spine, so every rule along that spine needs a
+ * twin. Everything the spine reaches through a bracket (atoms, collections,
+ * strings, patterns, types) is shared, and resets to the ordinary flavor.
+ *
+ * The flavors must stay disjoint: no state may predict both, or the two
+ * `_core_expression` rules become ambiguous. That holds because every reserved
+ * rule starts with either a keyword token or the reserved core itself.
+ */
+function expressionFlavor(reserved) {
+  const name = (base) => flavorName(base, reserved);
+  // A reference to a flavored rule, aliased back to its ordinary node name so
+  // the tree exposes one node type in either flavor.
+  const ref = ($, base) => {
+    const symbol = flavorSymbol($, base, reserved);
+    return reserved && !base.startsWith("_") ? alias(symbol, $[base]) : symbol;
+  };
+  // An operand of an operator: never a discard chain, in either flavor.
+  const operand = ($) => flavorSymbol($, "_core_expression", reserved);
+  // A trailing body: it inherits the current flavor.
+  const body = ($) => (reserved ? $._reserved_core_expression : $._expression);
+
+  return {
+    [name("_core_expression")]: ($) =>
+      choice(
+        ref($, "if_expression"),
+        ref($, "let_expression"),
+        ref($, "fn_expression"),
+        $.extern_expression,
+        ref($, "raise_expression"),
+        ref($, "try_expression"),
+        ref($, "switch_expression"),
+        ref($, "binary_expression"),
+        ref($, "unary_expression"),
+        ref($, "type_cast"),
+        ref($, "call_expression"),
+        ref($, "property_access"),
+        ref($, "indexed_access"),
+        $._atom_expression,
+      ),
+
+    [name("binary_expression")]: ($) =>
+      choice(
+        prec.left(PREC.OR, seq(field("left", operand($)), field("operator", "||"), field("right", operand($)))),
+        prec.left(PREC.AND, seq(field("left", operand($)), field("operator", "&&"), field("right", operand($)))),
+        prec.left(PREC.EQUALITY, seq(field("left", operand($)), field("operator", "=="), field("right", operand($)))),
+        prec.left(PREC.EQUALITY, seq(field("left", operand($)), field("operator", "!="), field("right", operand($)))),
+        prec.left(PREC.COMPARISON, seq(field("left", operand($)), field("operator", "<"), field("right", operand($)))),
+        prec.left(PREC.COMPARISON, seq(field("left", operand($)), field("operator", "<="), field("right", operand($)))),
+        prec.left(PREC.COMPARISON, seq(field("left", operand($)), field("operator", ">"), field("right", operand($)))),
+        prec.left(PREC.COMPARISON, seq(field("left", operand($)), field("operator", ">="), field("right", operand($)))),
+        prec.left(PREC.ADDITIVE, seq(field("left", operand($)), field("operator", "+"), field("right", operand($)))),
+        prec.left(PREC.ADDITIVE, seq(field("left", operand($)), field("operator", "-"), field("right", operand($)))),
+        prec.left(PREC.MULTIPLICATIVE, seq(field("left", operand($)), field("operator", "*"), field("right", operand($)))),
+        prec.left(PREC.MULTIPLICATIVE, seq(field("left", operand($)), field("operator", "/"), field("right", operand($)))),
+      ),
+
+    [name("unary_expression")]: ($) =>
+      prec(PREC.UNARY, seq(field("operator", choice("-", "!")), field("operand", operand($)))),
+
+    [name("type_cast")]: ($) =>
+      prec.left(PREC.POSTFIX, seq(
+        field("expression", operand($)),
+        "as",
+        field("type", $._type_expression),
+      )),
+
+    [name("property_access")]: ($) =>
+      prec.left(PREC.POSTFIX, seq(
+        field("object", operand($)),
+        ".",
+        field("property", $.identifier),
+      )),
+
+    [name("call_expression")]: ($) =>
+      prec.left(PREC.POSTFIX, seq(
+        field("function", operand($)),
+        optional($.type_arguments),
+        "(",
+        optional(commaSep1($._expression)),
+        ")",
+      )),
+
+    // Subscript / indexing: `expr[index]`. The opening bracket is matched with
+    // `token.immediate` so it only attaches when it directly follows the
+    // preceding expression with no intervening whitespace — this disambiguates
+    // a subscript from a fresh list literal in statement position (mirroring
+    // the reference parser's adjacency requirement).
+    [name("indexed_access")]: ($) =>
+      prec.left(PREC.POSTFIX, seq(
+        field("object", operand($)),
+        token.immediate("["),
+        field("index", $._expression),
+        "]",
+      )),
+
+    [name("if_expression")]: ($) =>
+      prec.right(seq(
+        "if",
+        "(",
+        field("condition", $._expression),
+        ")",
+        field("consequence", body($)),
+        optional(seq("else", field("alternative", body($)))),
+      )),
+
+    [name("let_expression")]: ($) =>
+      seq($.let_binding, ";", field("body", body($))),
+
+    [name("fn_expression")]: ($) =>
+      prec.right(seq(
+        "fn",
+        optional($.type_parameters),
+        "(",
+        optional($.fn_parameters),
+        ")",
+        field("body", body($)),
+      )),
+
+    [name("raise_expression")]: ($) =>
+      prec.right(seq("raise", field("value", body($)))),
+
+    [name("try_expression")]: ($) =>
+      prec.right(seq(
+        "try",
+        field("body", body($)),
+        repeat1(ref($, "catch_clause")),
+      )),
+
+    [name("catch_clause")]: ($) =>
+      choice(
+        seq(
+          "catch",
+          field("exception", $._catch_target),
+          "(",
+          field("binding", $.identifier),
+          ")",
+          ":",
+          field("body", body($)),
+        ),
+        seq(
+          "catch",
+          field("exception", $._catch_target),
+          ":",
+          field("body", body($)),
+        ),
+      ),
+
+    // A `switch` pairs a subject expression with zero or more `case` clauses.
+    // The subject expression extends rightward until the first `case` keyword;
+    // zero clauses is legal (its validity is a coverage question). Mirrors the
+    // right-associative shape of `try`/`catch`.
+    [name("switch_expression")]: ($) =>
+      prec.right(seq(
+        "switch",
+        field("subject", body($)),
+        repeat(ref($, "case_clause")),
+      )),
+
+    [name("case_clause")]: ($) =>
+      seq(
+        "case",
+        field("pattern", $._pattern),
+        ":",
+        field("body", body($)),
+      ),
+  };
 }

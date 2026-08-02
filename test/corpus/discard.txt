@@ -1,0 +1,292 @@
+================
+Discard chain
+================
+
+export let x = (a; b; c)
+
+---
+
+(source_file
+  (export_statement
+    (let_binding
+      name: (identifier)
+      value: (parenthesized_expression
+        (discard_expression
+          left: (identifier)
+          right: (discard_expression
+            left: (identifier)
+            right: (identifier)))))))
+
+================
+Discard binds looser than every operator
+================
+
+export let x = (a + b; c * d)
+
+---
+
+(source_file
+  (export_statement
+    (let_binding
+      name: (identifier)
+      value: (parenthesized_expression
+        (discard_expression
+          left: (binary_expression
+            left: (identifier)
+            right: (identifier))
+          right: (binary_expression
+            left: (identifier)
+            right: (identifier)))))))
+
+================
+Discard chain in a call argument
+================
+
+export let x = f(a; b, c)
+
+---
+
+(source_file
+  (export_statement
+    (let_binding
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        (discard_expression
+          left: (identifier)
+          right: (identifier))
+        (identifier)))))
+
+================
+Discard chain in a list element and an interpolation
+================
+
+export let x = [a; b, "{c; d}"]
+
+---
+
+(source_file
+  (export_statement
+    (let_binding
+      name: (identifier)
+      value: (list
+        (discard_expression
+          left: (identifier)
+          right: (identifier))
+        (string
+          (interpolation
+            (discard_expression
+              left: (identifier)
+              right: (identifier))))))))
+
+================
+A then-branch swallows a following chain
+================
+
+export let x = (if (c) A(); B())
+
+---
+
+(source_file
+  (export_statement
+    (let_binding
+      name: (identifier)
+      value: (parenthesized_expression
+        (if_expression
+          condition: (identifier)
+          consequence: (discard_expression
+            left: (call_expression
+              function: (identifier))
+            right: (call_expression
+              function: (identifier))))))))
+
+================
+A function body swallows a following chain
+================
+
+export let double = (fn(n: Int) n; n * 2)
+
+---
+
+(source_file
+  (export_statement
+    (let_binding
+      name: (identifier)
+      value: (parenthesized_expression
+        (fn_expression
+          (fn_parameters
+            (fn_parameter
+              name: (identifier)
+              type: (type_identifier)))
+          body: (discard_expression
+            left: (identifier)
+            right: (binary_expression
+              left: (identifier)
+              right: (integer))))))))
+
+================
+A case arm swallows a following chain
+================
+
+export let x = (switch s case .a: A(); B())
+
+---
+
+(source_file
+  (export_statement
+    (let_binding
+      name: (identifier)
+      value: (parenthesized_expression
+        (switch_expression
+          subject: (identifier)
+          (case_clause
+            pattern: (variant_pattern
+              label: (identifier))
+            body: (discard_expression
+              left: (call_expression
+                function: (identifier))
+              right: (call_expression
+                function: (identifier)))))))))
+
+================
+A binding's semicolon closes the binding, not the raise
+================
+
+let port = if (ok) p else raise Invalid("port");
+Container(port)
+
+---
+
+(source_file
+  (let_expression
+    (let_binding
+      name: (identifier)
+      value: (if_expression
+        condition: (identifier)
+        consequence: (identifier)
+        alternative: (raise_expression
+          value: (call_expression
+            function: (identifier)
+            (string
+              (string_content))))))
+    body: (call_expression
+      function: (identifier)
+      (identifier))))
+
+================
+Nested let bindings claim semicolons inside out
+================
+
+let x = let y = a; b; c
+
+---
+
+(source_file
+  (let_expression
+    (let_binding
+      name: (identifier)
+      value: (let_expression
+        (let_binding
+          name: (identifier)
+          value: (identifier))
+        body: (identifier)))
+    body: (identifier)))
+
+================
+Parentheses reset the reservation
+================
+
+let x = (A(); B());
+C()
+
+---
+
+(source_file
+  (let_expression
+    (let_binding
+      name: (identifier)
+      value: (parenthesized_expression
+        (discard_expression
+          left: (call_expression
+            function: (identifier))
+          right: (call_expression
+            function: (identifier)))))
+    body: (call_expression
+      function: (identifier))))
+
+================
+Parentheses let a keyword-bounded body hold a chain
+================
+
+export let x = try (A(); B()) catch E(e): c
+
+---
+
+(source_file
+  (export_statement
+    (let_binding
+      name: (identifier)
+      value: (try_expression
+        body: (parenthesized_expression
+          (discard_expression
+            left: (call_expression
+              function: (identifier))
+            right: (call_expression
+              function: (identifier))))
+        (catch_clause
+          exception: (identifier)
+          binding: (identifier)
+          body: (identifier))))))
+
+================
+A bare let at module level is an inline let expression
+================
+
+let x = A(); B()
+
+---
+
+(source_file
+  (let_expression
+    (let_binding
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)))
+    body: (call_expression
+      function: (identifier))))
+
+================
+A semicolon after a declaration is an error
+================
+
+export let x = A(); B()
+
+---
+
+(source_file
+  (export_statement
+    (let_binding
+      name: (identifier)
+      value: (call_expression
+        function: (identifier))))
+  (ERROR
+    (string_content)))
+
+================
+A keyword-bounded body inside a declaration stays reserved
+================
+
+export let x = if (c) A(); B()
+
+---
+
+(source_file
+  (export_statement
+    (let_binding
+      name: (identifier)
+      value: (if_expression
+        condition: (identifier)
+        consequence: (call_expression
+          function: (identifier)))))
+  (ERROR
+    (string_content)))
