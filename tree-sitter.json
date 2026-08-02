@@ -4,7 +4,9 @@
     "license": "MIT",
     "description": "Tree-sitter grammar for SCL (Skyr Configuration Language)",
     "authors": [],
-    "links": {}
+    "links": {
+      "repository": "https://github.com/skyr-cloud/tree-sitter-scl"
+    }
   },
   "grammars": [
     {
