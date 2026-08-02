@@ -83,6 +83,42 @@ a || b
     right: (identifier)))
 
 ================
+Nil-coalescing operator
+================
+
+a ?? b
+a ?? b ?? c
+
+---
+
+(source_file
+  (binary_expression
+    left: (identifier)
+    right: (identifier))
+  (binary_expression
+    left: (binary_expression
+      left: (identifier)
+      right: (identifier))
+    right: (identifier)))
+
+================
+Nil-coalescing binds tighter than `||` and looser than `&&`
+================
+
+p || q ?? r && s
+
+---
+
+(source_file
+  (binary_expression
+    left: (identifier)
+    right: (binary_expression
+      left: (identifier)
+      right: (binary_expression
+        left: (identifier)
+        right: (identifier)))))
+
+================
 Unary negation
 ================
 

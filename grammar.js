@@ -7,13 +7,14 @@ const PREC = {
   // reached in an ordinary position starts a chain instead of ending one.
   DISCARD: 1,
   OR: 2,
-  AND: 3,
-  EQUALITY: 4,
-  COMPARISON: 5,
-  ADDITIVE: 6,
-  MULTIPLICATIVE: 7,
-  UNARY: 8,
-  POSTFIX: 9,
+  NIL_COALESCE: 3,
+  AND: 4,
+  EQUALITY: 5,
+  COMPARISON: 6,
+  ADDITIVE: 7,
+  MULTIPLICATIVE: 8,
+  UNARY: 9,
+  POSTFIX: 10,
 };
 
 // The expression rules that exist in two flavors — see the "Expressions"
@@ -505,6 +506,7 @@ function expressionFlavor(reserved) {
     [name("binary_expression")]: ($) =>
       choice(
         prec.left(PREC.OR, seq(field("left", operand($)), field("operator", "||"), field("right", operand($)))),
+        prec.left(PREC.NIL_COALESCE, seq(field("left", operand($)), field("operator", "??"), field("right", operand($)))),
         prec.left(PREC.AND, seq(field("left", operand($)), field("operator", "&&"), field("right", operand($)))),
         prec.left(PREC.EQUALITY, seq(field("left", operand($)), field("operator", "=="), field("right", operand($)))),
         prec.left(PREC.EQUALITY, seq(field("left", operand($)), field("operator", "!="), field("right", operand($)))),
