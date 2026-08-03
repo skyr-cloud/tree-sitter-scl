@@ -26,6 +26,66 @@ if (x) 1
     consequence: (integer)))
 
 ================
+With expression
+================
+
+with (a) b
+
+---
+
+(source_file
+  (with_expression
+    subject: (identifier)
+    body: (identifier)))
+
+================
+With body extends rightward through a binding
+================
+
+with (a) let x = 1; x
+
+---
+
+(source_file
+  (with_expression
+    subject: (identifier)
+    body: (let_expression
+      (let_binding
+        name: (identifier)
+        value: (integer))
+      body: (identifier))))
+
+================
+Nested with expressions
+================
+
+with (a) with (b) c
+
+---
+
+(source_file
+  (with_expression
+    subject: (identifier)
+    body: (with_expression
+      subject: (identifier)
+      body: (identifier))))
+
+================
+An identifier starting with `with` is not the keyword
+================
+
+let x = withParent(node)
+
+---
+
+(source_file
+  (let_binding
+    name: (identifier)
+    value: (call_expression
+      function: (identifier)
+      (identifier))))
+
+================
 Let expression
 ================
 

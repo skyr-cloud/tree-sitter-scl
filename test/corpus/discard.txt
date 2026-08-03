@@ -149,6 +149,27 @@ export let x = (switch s case .a: A(); B())
                 function: (identifier)))))))))
 
 ================
+A with body swallows a following chain
+================
+
+export let x = (with (a) A(); B())
+
+---
+
+(source_file
+  (export_statement
+    (let_binding
+      name: (identifier)
+      value: (parenthesized_expression
+        (with_expression
+          subject: (identifier)
+          body: (discard_expression
+            left: (call_expression
+              function: (identifier))
+            right: (call_expression
+              function: (identifier))))))))
+
+================
 A binding's semicolon closes the binding, not the raise
 ================
 
@@ -338,6 +359,45 @@ let x = try A() catch E(e): B(); rest
           binding: (identifier)
           body: (call_expression
             function: (identifier)))))
+    body: (identifier)))
+
+================
+A reserved with body stops at the binding's semicolon
+================
+
+let x = with (a) A(); rest
+
+---
+
+(source_file
+  (let_expression
+    (let_binding
+      name: (identifier)
+      value: (with_expression
+        subject: (identifier)
+        body: (call_expression
+          function: (identifier))))
+    body: (identifier)))
+
+================
+A with subject resets the reservation
+================
+
+let x = with (A(); B()) c; rest
+
+---
+
+(source_file
+  (let_expression
+    (let_binding
+      name: (identifier)
+      value: (with_expression
+        subject: (discard_expression
+          left: (call_expression
+            function: (identifier))
+          right: (call_expression
+            function: (identifier)))
+        body: (identifier)))
     body: (identifier)))
 
 ================

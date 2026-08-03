@@ -30,6 +30,7 @@ const FLAVORED = [
   "catch_clause",
   "switch_expression",
   "case_clause",
+  "with_expression",
   "binary_expression",
   "unary_expression",
   "type_cast",
@@ -132,7 +133,7 @@ module.exports = grammar({
     //     binding's value, whose `;` closes the binding, and module-statement
     //     level, which has no terminator at all. The reservation propagates
     //     down the rightward spine — the trailing bodies of `if`, `fn`,
-    //     `raise`, `try`, `switch` and of a nested `let` — so a nested body
+    //     `raise`, `try`, `switch`, `with` and of a nested `let` — so a nested body
     //     cannot eat the `;` its enclosing binding requires. That is what keeps
     //     `let x = if (c) v else raise E("…"); rest` parsing as a binding
     //     followed by `rest`, and what makes a stray `;` at module level an
@@ -143,7 +144,8 @@ module.exports = grammar({
     // its own (a `let` awaiting its `;`), and the first one nothing claims ends
     // the reserved region. Bracketing delimiters — parentheses, brackets,
     // argument lists, indices, interpolations, collection members, the
-    // parenthesised `if` condition — reset to the ordinary flavor, so
+    // parenthesised `if` condition and `with` subject — reset to the ordinary
+    // flavor, so
     // `let x = (A(); B()); rest` and `f(a; b)` chain anywhere. Positions bounded
     // only by a keyword (a then-branch before `else`, a non-final `case` arm, a
     // `try` body before `catch`) stay reserved; parenthesise to chain there.
@@ -500,6 +502,7 @@ function expressionFlavor(reserved) {
         ref($, "raise_expression"),
         ref($, "try_expression"),
         ref($, "switch_expression"),
+        ref($, "with_expression"),
         ref($, "binary_expression"),
         ref($, "unary_expression"),
         ref($, "type_cast"),
@@ -635,5 +638,19 @@ function expressionFlavor(reserved) {
         ":",
         field("body", body($)),
       ),
+
+    // A `with` gates its trailing body on the parenthesised subject's
+    // existence. The subject sits in the construct's own parentheses — a
+    // bracketing delimiter, so it resets to the ordinary flavor — while the
+    // body extends rightward and inherits the current flavor, exactly like an
+    // `if` branch.
+    [name("with_expression")]: ($) =>
+      prec.right(seq(
+        "with",
+        "(",
+        field("subject", $._expression),
+        ")",
+        field("body", body($)),
+      )),
   };
 }

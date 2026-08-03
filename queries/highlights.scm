@@ -16,6 +16,7 @@
 "catch" @keyword
 "switch" @keyword.conditional
 "case" @keyword.conditional
+"with" @keyword
 "as" @keyword
 
 ; Literals

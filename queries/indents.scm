@@ -10,6 +10,7 @@
   (if_expression)
   (try_expression)
   (switch_expression)
+  (with_expression)
   (parenthesized_expression)
 ] @indent
 
