@@ -25,6 +25,11 @@
 (boolean) @constant.builtin
 (nil) @constant.builtin
 
+; Annotations (the `@` and the name; arguments highlight as their own literals)
+(annotation
+  "@" @attribute
+  name: (identifier) @attribute)
+
 ; Atoms and enum variants (the label only; payloads highlight as their own kind)
 (atom label: (identifier) @constant)
 (enum_variant label: (identifier) @constant)

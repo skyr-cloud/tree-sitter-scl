@@ -70,6 +70,7 @@ module.exports = grammar({
     // written after one would otherwise pull the following statement into it.
     _mod_stmt: ($) =>
       choice(
+        $.annotated_statement,
         $.import_statement,
         $.export_type_declaration,
         $.export_statement,
@@ -77,6 +78,33 @@ module.exports = grammar({
         $._reserved_core_expression,
         $.let_binding,
       ),
+
+    // An annotation marks the module statement it heads. Its operand is itself
+    // a module statement, so annotations stack: `@a @b let x = 1` is one
+    // statement bearing two of them.
+    annotated_statement: ($) => seq($.annotation, $._mod_stmt),
+
+    // `@name`, optionally with a parenthesised argument list. The list binds
+    // tightly to the name, as an atom's payload binds to its label, so a `(`
+    // after an annotation opens the list rather than a parenthesized statement.
+    annotation: ($) =>
+      prec.right(seq("@", field("name", $.identifier), optional($.annotation_arguments))),
+
+    annotation_arguments: ($) => seq("(", commaSep1($._annotation_argument), ")"),
+
+    // Annotation arguments are literals: an annotation is a constant of the
+    // program text, resolved before anything is evaluated.
+    _annotation_argument: ($) =>
+      choice(
+        $.signed_number,
+        $.float,
+        $.integer,
+        $.string,
+        $.boolean,
+        $.nil,
+      ),
+
+    signed_number: ($) => seq("-", choice($.float, $.integer)),
 
     // ── Statements ─────────────────────────────────────────────
 

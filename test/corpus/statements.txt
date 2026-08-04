@@ -187,3 +187,66 @@ type Pair<A, B> { first: A, second: B }
       (record_type_field
         name: (identifier)
         type: (type_identifier)))))
+
+================
+Annotated statement
+================
+
+@test
+import Std/Test
+
+---
+
+(source_file
+  (annotated_statement
+    (annotation
+      name: (identifier))
+    (import_statement
+      (import_path
+        (import_fragment)
+        (import_fragment)))))
+
+================
+Annotation with literal arguments
+================
+
+@marks(1, -2.5, "s", true, nil)
+let x = 1
+
+---
+
+(source_file
+  (annotated_statement
+    (annotation
+      name: (identifier)
+      (annotation_arguments
+        (integer)
+        (signed_number
+          (float))
+        (string
+          (string_content))
+        (boolean)
+        (nil)))
+    (let_binding
+      name: (identifier)
+      value: (integer))))
+
+================
+Stacked annotations
+================
+
+@a @b export let x = 1
+
+---
+
+(source_file
+  (annotated_statement
+    (annotation
+      name: (identifier))
+    (annotated_statement
+      (annotation
+        name: (identifier))
+      (export_statement
+        (let_binding
+          name: (identifier)
+          value: (integer))))))
