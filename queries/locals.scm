@@ -2,6 +2,7 @@
 (fn_expression) @local.scope
 (let_expression) @local.scope
 (list_for_item) @local.scope
+(dict_for_item) @local.scope
 (case_clause) @local.scope
 
 ; Definitions
@@ -10,6 +11,8 @@
 (fn_parameter
   name: (identifier) @local.definition)
 (list_for_item
+  variable: (identifier) @local.definition)
+(dict_for_item
   variable: (identifier) @local.definition)
 (catch_clause
   binding: (identifier) @local.definition)

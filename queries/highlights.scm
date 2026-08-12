@@ -95,6 +95,8 @@
   name: (identifier) @variable.parameter)
 (list_for_item
   variable: (identifier) @variable)
+(dict_for_item
+  variable: (identifier) @variable)
 (catch_clause
   binding: (identifier) @variable)
 (catch_clause

@@ -324,7 +324,45 @@ module.exports = grammar({
     dict: ($) =>
       choice(
         seq("#", "{", "}"),
-        seq("#", "{", commaSep1($.dict_entry), "}"),
+        seq("#", "{", commaSep1($._dict_item), "}"),
+      ),
+
+    // A dict item mirrors a list item: an entry, or one of the two
+    // comprehension forms wrapped around another item.
+    //
+    // Unlike `_list_item`, this needs no conflict with `if_expression` and no
+    // dynamic precedence to prefer the item reading. A dict item always ends
+    // in `key: value`, so the two readings of `#{if (c) "k": v}` — a guarded
+    // entry, or an entry keyed by the else-less `if` expression `if (c) "k"` —
+    // are told apart by the `:`: `if_expression`'s right associativity shifts
+    // it into the entry that is the guard's body. An `else` instead keeps the
+    // `if` an expression, since a guarded item has no `else`, so
+    // `#{if (c) "a" else "b": 1}` is an entry with an `if`-expression key.
+    _dict_item: ($) =>
+      choice(
+        $.dict_for_item,
+        $.dict_if_item,
+        $.dict_entry,
+      ),
+
+    dict_for_item: ($) =>
+      seq(
+        "for",
+        "(",
+        field("variable", $.identifier),
+        "in",
+        field("iterable", $._expression),
+        ")",
+        field("body", $._dict_item),
+      ),
+
+    dict_if_item: ($) =>
+      seq(
+        "if",
+        "(",
+        field("condition", $._expression),
+        ")",
+        field("body", $._dict_item),
       ),
 
     dict_entry: ($) =>

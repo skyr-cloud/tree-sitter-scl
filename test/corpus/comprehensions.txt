@@ -67,3 +67,151 @@ Conditional list item
     (list_if_item
       condition: (identifier)
       body: (identifier))))
+
+================
+Dict map comprehension
+================
+
+#{for (x in list) x: x + 1}
+
+---
+
+(source_file
+  (dict
+    (dict_for_item
+      variable: (identifier)
+      iterable: (identifier)
+      body: (dict_entry
+        key: (identifier)
+        value: (binary_expression
+          left: (identifier)
+          right: (integer))))))
+
+================
+Dict filter comprehension
+================
+
+#{for (x in list) if (x > 0) "k{x}": x}
+
+---
+
+(source_file
+  (dict
+    (dict_for_item
+      variable: (identifier)
+      iterable: (identifier)
+      body: (dict_if_item
+        condition: (binary_expression
+          left: (identifier)
+          right: (integer))
+        body: (dict_entry
+          key: (string
+            (string_content)
+            (interpolation
+              (identifier)))
+          value: (identifier))))))
+
+================
+Nested dict comprehension
+================
+
+#{for (a in as) for (b in bs) a: b}
+
+---
+
+(source_file
+  (dict
+    (dict_for_item
+      variable: (identifier)
+      iterable: (identifier)
+      body: (dict_for_item
+        variable: (identifier)
+        iterable: (identifier)
+        body: (dict_entry
+          key: (identifier)
+          value: (identifier))))))
+
+================
+Conditional dict entry among plain ones
+================
+
+#{"a": 1, if (flag) "b": 2, "c": 3}
+
+---
+
+(source_file
+  (dict
+    (dict_entry
+      key: (string
+        (string_content))
+      value: (integer))
+    (dict_if_item
+      condition: (identifier)
+      body: (dict_entry
+        key: (string
+          (string_content))
+        value: (integer)))
+    (dict_entry
+      key: (string
+        (string_content))
+      value: (integer))))
+
+================
+Nested conditional dict entries
+================
+
+#{if (a) if (b) "k": 1}
+
+---
+
+(source_file
+  (dict
+    (dict_if_item
+      condition: (identifier)
+      body: (dict_if_item
+        condition: (identifier)
+        body: (dict_entry
+          key: (string
+            (string_content))
+          value: (integer))))))
+
+================
+If expression as a dict key
+================
+
+#{if (c) "a" else "b": 1}
+
+---
+
+(source_file
+  (dict
+    (dict_entry
+      key: (if_expression
+        condition: (identifier)
+        consequence: (string
+          (string_content))
+        alternative: (string
+          (string_content)))
+      value: (integer))))
+
+================
+If expression as a dict key under a generator
+================
+
+#{for (x in y) if (c) "a" else "b": x}
+
+---
+
+(source_file
+  (dict
+    (dict_for_item
+      variable: (identifier)
+      iterable: (identifier)
+      body: (dict_entry
+        key: (if_expression
+          condition: (identifier)
+          consequence: (string
+            (string_content))
+          alternative: (string
+            (string_content)))
+        value: (identifier)))))

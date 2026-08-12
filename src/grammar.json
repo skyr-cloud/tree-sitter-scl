@@ -3449,7 +3449,7 @@
               "members": [
                 {
                   "type": "SYMBOL",
-                  "name": "dict_entry"
+                  "name": "_dict_item"
                 },
                 {
                   "type": "REPEAT",
@@ -3462,7 +3462,7 @@
                       },
                       {
                         "type": "SYMBOL",
-                        "name": "dict_entry"
+                        "name": "_dict_item"
                       }
                     ]
                   }
@@ -3486,6 +3486,101 @@
               "value": "}"
             }
           ]
+        }
+      ]
+    },
+    "_dict_item": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "dict_for_item"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "dict_if_item"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "dict_entry"
+        }
+      ]
+    },
+    "dict_for_item": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "for"
+        },
+        {
+          "type": "STRING",
+          "value": "("
+        },
+        {
+          "type": "FIELD",
+          "name": "variable",
+          "content": {
+            "type": "SYMBOL",
+            "name": "identifier"
+          }
+        },
+        {
+          "type": "STRING",
+          "value": "in"
+        },
+        {
+          "type": "FIELD",
+          "name": "iterable",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_expression"
+          }
+        },
+        {
+          "type": "STRING",
+          "value": ")"
+        },
+        {
+          "type": "FIELD",
+          "name": "body",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_dict_item"
+          }
+        }
+      ]
+    },
+    "dict_if_item": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "if"
+        },
+        {
+          "type": "STRING",
+          "value": "("
+        },
+        {
+          "type": "FIELD",
+          "name": "condition",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_expression"
+          }
+        },
+        {
+          "type": "STRING",
+          "value": ")"
+        },
+        {
+          "type": "FIELD",
+          "name": "body",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_dict_item"
+          }
         }
       ]
     },
