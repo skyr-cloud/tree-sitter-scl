@@ -3502,6 +3502,10 @@
         },
         {
           "type": "SYMBOL",
+          "name": "dict_spread_item"
+        },
+        {
+          "type": "SYMBOL",
           "name": "dict_entry"
         }
       ]
@@ -3580,6 +3584,23 @@
           "content": {
             "type": "SYMBOL",
             "name": "_dict_item"
+          }
+        }
+      ]
+    },
+    "dict_spread_item": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "in"
+        },
+        {
+          "type": "FIELD",
+          "name": "operand",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_expression"
           }
         }
       ]
@@ -3690,6 +3711,10 @@
         },
         {
           "type": "SYMBOL",
+          "name": "list_spread_item"
+        },
+        {
+          "type": "SYMBOL",
           "name": "_expression"
         }
       ]
@@ -3779,6 +3804,23 @@
           }
         ]
       }
+    },
+    "list_spread_item": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "in"
+        },
+        {
+          "type": "FIELD",
+          "name": "operand",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_expression"
+          }
+        }
+      ]
     },
     "_type_expression": {
       "type": "CHOICE",

@@ -215,3 +215,128 @@ If expression as a dict key under a generator
           alternative: (string
             (string_content)))
         value: (identifier)))))
+
+================
+List spread item among plain items
+================
+
+[1, in xs, 2]
+
+---
+
+(source_file
+  (list
+    (integer)
+    (list_spread_item
+      operand: (identifier))
+    (integer)))
+
+================
+List spread item with a call operand
+================
+
+[in concat(xs, ys)]
+
+---
+
+(source_file
+  (list
+    (list_spread_item
+      operand: (call_expression
+        function: (identifier)
+        (identifier)
+        (identifier)))))
+
+================
+List spread item under a generator
+================
+
+[for (x in xss) in x]
+
+---
+
+(source_file
+  (list
+    (list_for_item
+      variable: (identifier)
+      iterable: (identifier)
+      body: (list_spread_item
+        operand: (identifier)))))
+
+================
+Conditional list spread item
+================
+
+[if (c) in xs]
+
+---
+
+(source_file
+  (list
+    (list_if_item
+      condition: (identifier)
+      body: (list_spread_item
+        operand: (identifier)))))
+
+================
+Dict spread item among entries
+================
+
+#{in defaults, "debug": true}
+
+---
+
+(source_file
+  (dict
+    (dict_spread_item
+      operand: (identifier))
+    (dict_entry
+      key: (string
+        (string_content))
+      value: (boolean))))
+
+================
+Merging dicts with spread items
+================
+
+#{in a, in b}
+
+---
+
+(source_file
+  (dict
+    (dict_spread_item
+      operand: (identifier))
+    (dict_spread_item
+      operand: (identifier))))
+
+================
+Dict spread item under a generator
+================
+
+#{for (d in ds) in d}
+
+---
+
+(source_file
+  (dict
+    (dict_for_item
+      variable: (identifier)
+      iterable: (identifier)
+      body: (dict_spread_item
+        operand: (identifier)))))
+
+================
+Conditional dict spread item
+================
+
+#{if (c) in overrides}
+
+---
+
+(source_file
+  (dict
+    (dict_if_item
+      condition: (identifier)
+      body: (dict_spread_item
+        operand: (identifier)))))

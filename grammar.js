@@ -327,21 +327,25 @@ module.exports = grammar({
         seq("#", "{", commaSep1($._dict_item), "}"),
       ),
 
-    // A dict item mirrors a list item: an entry, or one of the two
+    // A dict item mirrors a list item: an entry, a spread, or one of the
     // comprehension forms wrapped around another item.
     //
     // Unlike `_list_item`, this needs no conflict with `if_expression` and no
-    // dynamic precedence to prefer the item reading. A dict item always ends
-    // in `key: value`, so the two readings of `#{if (c) "k": v}` — a guarded
-    // entry, or an entry keyed by the else-less `if` expression `if (c) "k"` —
-    // are told apart by the `:`: `if_expression`'s right associativity shifts
-    // it into the entry that is the guard's body. An `else` instead keeps the
-    // `if` an expression, since a guarded item has no `else`, so
-    // `#{if (c) "a" else "b": 1}` is an entry with an `if`-expression key.
+    // dynamic precedence to prefer the item reading. An item ending in an
+    // entry ends in `key: value`, so the two readings of `#{if (c) "k": v}` —
+    // a guarded entry, or an entry keyed by the else-less `if` expression
+    // `if (c) "k"` — are told apart by the `:`: `if_expression`'s right
+    // associativity shifts it into the entry that is the guard's body. An
+    // `else` instead keeps the `if` an expression, since a guarded item has no
+    // `else`, so `#{if (c) "a" else "b": 1}` is an entry with an
+    // `if`-expression key. An item ending in a spread never enters the
+    // ambiguity: the `in` after `#{if (c)` can only open a spread body, since
+    // `in` can never begin an expression.
     _dict_item: ($) =>
       choice(
         $.dict_for_item,
         $.dict_if_item,
+        $.dict_spread_item,
         $.dict_entry,
       ),
 
@@ -365,6 +369,13 @@ module.exports = grammar({
         field("body", $._dict_item),
       ),
 
+    // A spread item `in e` splices the operand collection's contents at its
+    // position. Unambiguous with zero lookahead, as in the reference parser:
+    // `in` can never begin an expression — a key expression included — so an
+    // item-initial `in` is always a spread.
+    dict_spread_item: ($) =>
+      seq("in", field("operand", $._expression)),
+
     dict_entry: ($) =>
       seq(field("key", $._expression), ":", field("value", $._expression)),
 
@@ -378,6 +389,7 @@ module.exports = grammar({
       choice(
         $.list_for_item,
         $.list_if_item,
+        $.list_spread_item,
         $._expression,
       ),
 
@@ -400,6 +412,15 @@ module.exports = grammar({
         ")",
         field("body", $._list_item),
       )),
+
+    // A spread item `in e` splices the operand list's elements at its
+    // position. It needs neither the `if_expression` conflict nor a dynamic
+    // precedence: `in` can never begin an expression, so an item-initial `in`
+    // is always a spread — with zero lookahead, as in the reference parser —
+    // and an `in` after `[if (c)` can only open a spread body, never an `if`
+    // expression's consequence.
+    list_spread_item: ($) =>
+      seq("in", field("operand", $._expression)),
 
     // ── Type expressions ───────────────────────────────────────
 
