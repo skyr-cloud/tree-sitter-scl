@@ -1000,8 +1000,17 @@
             }
           },
           {
-            "type": "STRING",
-            "value": "."
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "STRING",
+                "value": "."
+              },
+              {
+                "type": "SYMBOL",
+                "name": "optional_chain"
+              }
+            ]
           },
           {
             "type": "FIELD",
@@ -2132,8 +2141,17 @@
             }
           },
           {
-            "type": "STRING",
-            "value": "."
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "STRING",
+                "value": "."
+              },
+              {
+                "type": "SYMBOL",
+                "name": "optional_chain"
+              }
+            ]
           },
           {
             "type": "FIELD",
@@ -2631,6 +2649,19 @@
           }
         ]
       }
+    },
+    "optional_chain": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "?"
+        },
+        {
+          "type": "STRING",
+          "value": "."
+        }
+      ]
     },
     "fn_parameters": {
       "type": "SEQ",

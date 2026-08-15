@@ -192,6 +192,88 @@ obj.field.nested
     property: (identifier)))
 
 ================
+Optional chaining
+================
+
+obj?.field
+
+---
+
+(source_file
+  (property_access
+    object: (identifier)
+    (optional_chain)
+    property: (identifier)))
+
+================
+Optional chaining mixed with plain access and calls
+================
+
+obj?.a.b?.c()?.d
+
+---
+
+(source_file
+  (property_access
+    object: (call_expression
+      function: (property_access
+        object: (property_access
+          object: (property_access
+            object: (identifier)
+            (optional_chain)
+            property: (identifier))
+          property: (identifier))
+        (optional_chain)
+        property: (identifier)))
+    (optional_chain)
+    property: (identifier)))
+
+================
+Optional chaining coalesced
+================
+
+let name = user?.name ?? "anonymous"
+
+---
+
+(source_file
+  (let_binding
+    name: (identifier)
+    value: (binary_expression
+      left: (property_access
+        object: (identifier)
+        (optional_chain)
+        property: (identifier))
+      right: (string
+        (string_content)))))
+
+================
+Optional chaining on an optional-typed binding
+================
+
+let x: {name: Str}? = nil
+export let r = x?.name
+
+---
+
+(source_file
+  (let_binding
+    name: (identifier)
+    type: (optional_type
+      (record_type
+        (record_type_field
+          name: (identifier)
+          type: (type_identifier))))
+    value: (nil))
+  (export_statement
+    (let_binding
+      name: (identifier)
+      value: (property_access
+        object: (identifier)
+        (optional_chain)
+        property: (identifier)))))
+
+================
 Function call
 ================
 

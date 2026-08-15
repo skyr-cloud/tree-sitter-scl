@@ -59,6 +59,11 @@
 (unary_expression
   operator: _ @operator)
 
+; The `?` that marks an optional type, and the `?.` that chains through one.
+(optional_chain) @operator
+(optional_type
+  "?" @operator)
+
 ; Functions
 (call_expression
   function: (identifier) @function.call)

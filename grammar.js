@@ -195,6 +195,12 @@ module.exports = grammar({
     ...expressionFlavor(false),
     ...expressionFlavor(true),
 
+    // The optional-chaining head of a property access, `?.`. Two tokens rather
+    // than one, as in the reference parser, so whitespace between them is
+    // permitted; a node of its own so the chaining form is distinguishable from
+    // a plain `.` in the tree.
+    optional_chain: ($) => seq("?", "."),
+
     fn_parameters: ($) => commaSep1($.fn_parameter),
 
     // A parameter's type annotation is optional: an untyped parameter is legal
@@ -633,10 +639,12 @@ function expressionFlavor(reserved) {
         field("type", $._type_expression),
       )),
 
+    // Property access, `a.b`, and its optional-chaining form `a?.b`, which
+    // yields nil instead of reading the property when the object is nil.
     [name("property_access")]: ($) =>
       prec.left(PREC.POSTFIX, seq(
         field("object", operand($)),
-        ".",
+        choice(".", $.optional_chain),
         field("property", $.identifier),
       )),
 
