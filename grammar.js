@@ -440,6 +440,7 @@ module.exports = grammar({
         $.record_type,
         $.enum_type,
         $.list_type,
+        $.type_application,
         $.type_property_access,
         alias($.identifier, $.type_identifier),
       ),
@@ -480,6 +481,12 @@ module.exports = grammar({
 
     type_property_access: ($) =>
       prec.left(2, seq($._type_expression_base, ".", alias($.identifier, $.type_identifier))),
+
+    // Instantiating a generic type, `Foo<A, B>`. Like `type_property_access` it
+    // is a suffix on a base type, so the two chain in either order and in any
+    // number: `Std.Map<K, V>.Entry`.
+    type_application: ($) =>
+      prec.left(2, seq(field("base", $._type_expression_base), $.type_arguments)),
 
     // ── Generics ───────────────────────────────────────────────
 

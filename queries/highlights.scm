@@ -80,6 +80,18 @@
 (fn_parameter
   type: (type_identifier) @type)
 
+; Generics — a declared type parameter is a type name like any other, and the
+; angle brackets delimiting parameters and arguments are brackets, not the
+; comparison operators they share their spelling with.
+(type_parameter
+  name: (identifier) @type)
+(type_parameters
+  "<" @punctuation.bracket
+  ">" @punctuation.bracket)
+(type_arguments
+  "<" @punctuation.bracket
+  ">" @punctuation.bracket)
+
 ; Properties
 (property_access
   property: (identifier) @property)

@@ -79,3 +79,138 @@ export let map = extern "Std/List.map": fn<T, U>([T], fn(T) U) [U]
             return_type: (type_identifier))
           return_type: (list_type
             (type_identifier)))))))
+
+================
+Generic type application
+================
+
+let ids: List<Int> = xs
+
+---
+
+(source_file
+  (let_binding
+    name: (identifier)
+    type: (type_application
+      base: (type_identifier)
+      (type_arguments
+        (type_identifier)))
+    value: (identifier)))
+
+================
+Type application with several arguments
+================
+
+type Pair<A, B> Result<A, B, Str?>
+
+---
+
+(source_file
+  (type_declaration
+    name: (identifier)
+    (type_parameters
+      (type_parameter
+        name: (identifier))
+      (type_parameter
+        name: (identifier)))
+    type: (type_application
+      base: (type_identifier)
+      (type_arguments
+        (type_identifier)
+        (type_identifier)
+        (optional_type
+          (type_identifier))))))
+
+================
+Type application chained with property access
+================
+
+let m: Std.Map<Str, Int>.Entry = e
+
+---
+
+(source_file
+  (let_binding
+    name: (identifier)
+    type: (type_property_access
+      (type_application
+        base: (type_property_access
+          (type_identifier)
+          (type_identifier))
+        (type_arguments
+          (type_identifier)
+          (type_identifier)))
+      (type_identifier))
+    value: (identifier)))
+
+================
+Type application in a generic record type
+================
+
+export type Ingress<TFrontend> {
+  Rule: fn(RuleOptions<TFrontend>) Rule<TFrontend>,
+}
+
+---
+
+(source_file
+  (export_type_declaration
+    (type_declaration
+      name: (identifier)
+      (type_parameters
+        (type_parameter
+          name: (identifier)))
+      type: (record_type
+        (record_type_field
+          name: (identifier)
+          type: (fn_type
+            (type_application
+              base: (type_identifier)
+              (type_arguments
+                (type_identifier)))
+            return_type: (type_application
+              base: (type_identifier)
+              (type_arguments
+                (type_identifier)))))))))
+
+================
+Optional type application
+================
+
+let x: Box<Int>? = nil
+
+---
+
+(source_file
+  (let_binding
+    name: (identifier)
+    type: (optional_type
+      (type_application
+        base: (type_identifier)
+        (type_arguments
+          (type_identifier))))
+    value: (nil)))
+
+================
+Type application in a cast, and comparison unaffected
+================
+
+let x = v as List<Int>
+let y = a < b
+
+---
+
+(source_file
+  (let_binding
+    name: (identifier)
+    value: (type_cast
+      expression: (identifier)
+      type: (type_application
+        base: (type_identifier)
+        (type_arguments
+          (type_identifier)))))
+  (let_binding
+    name: (identifier)
+    value: (binary_expression
+      left: (identifier)
+      right: (identifier))))

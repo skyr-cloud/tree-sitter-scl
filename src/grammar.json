@@ -3877,6 +3877,10 @@
         },
         {
           "type": "SYMBOL",
+          "name": "type_application"
+        },
+        {
+          "type": "SYMBOL",
           "name": "type_property_access"
         },
         {
@@ -4278,6 +4282,27 @@
             },
             "named": true,
             "value": "type_identifier"
+          }
+        ]
+      }
+    },
+    "type_application": {
+      "type": "PREC_LEFT",
+      "value": 2,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "FIELD",
+            "name": "base",
+            "content": {
+              "type": "SYMBOL",
+              "name": "_type_expression_base"
+            }
+          },
+          {
+            "type": "SYMBOL",
+            "name": "type_arguments"
           }
         ]
       }
