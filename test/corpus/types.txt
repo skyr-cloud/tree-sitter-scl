@@ -10,7 +10,8 @@ fn(x: Int?) x
   (fn_expression
     (fn_parameters
       (fn_parameter
-        name: (identifier)
+        pattern: (binding_pattern
+          name: (identifier))
         type: (optional_type
           (type_identifier))))
     body: (identifier)))
@@ -27,7 +28,8 @@ fn(xs: [Int]) xs
   (fn_expression
     (fn_parameters
       (fn_parameter
-        name: (identifier)
+        pattern: (binding_pattern
+          name: (identifier))
         type: (list_type
           (type_identifier))))
     body: (identifier)))
@@ -44,7 +46,8 @@ fn(cfg: { host: Str, port: Int }) cfg
   (fn_expression
     (fn_parameters
       (fn_parameter
-        name: (identifier)
+        pattern: (binding_pattern
+          name: (identifier))
         type: (record_type
           (record_type_field
             name: (identifier)
@@ -66,7 +69,8 @@ fn(d: #{ Str: Int }) d
   (fn_expression
     (fn_parameters
       (fn_parameter
-        name: (identifier)
+        pattern: (binding_pattern
+          name: (identifier))
         type: (dict_type
           key: (type_identifier)
           value: (type_identifier))))
@@ -84,7 +88,8 @@ fn(f: fn(Int) Str) f
   (fn_expression
     (fn_parameters
       (fn_parameter
-        name: (identifier)
+        pattern: (binding_pattern
+          name: (identifier))
         type: (fn_type
           (type_identifier)
           return_type: (type_identifier))))
@@ -102,7 +107,8 @@ fn(cfg: MyLib.Config) cfg
   (fn_expression
     (fn_parameters
       (fn_parameter
-        name: (identifier)
+        pattern: (binding_pattern
+          name: (identifier))
         type: (type_property_access
           (type_identifier)
           (type_identifier))))
@@ -118,7 +124,8 @@ let m: enum { .dev, .prod } = .dev
 
 (source_file
   (let_binding
-    name: (identifier)
+    pattern: (binding_pattern
+      name: (identifier))
     type: (enum_type
       (enum_variant
         label: (identifier))

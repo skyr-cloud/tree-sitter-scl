@@ -17,7 +17,8 @@ fn<T <: { name: Str }>(item: T) item.name
             type: (type_identifier)))))
     (fn_parameters
       (fn_parameter
-        name: (identifier)
+        pattern: (binding_pattern
+          name: (identifier))
         type: (type_identifier)))
     body: (property_access
       object: (identifier)
@@ -40,10 +41,12 @@ fn<T, U>(x: T, f: fn(T) U) f(x)
         name: (identifier)))
     (fn_parameters
       (fn_parameter
-        name: (identifier)
+        pattern: (binding_pattern
+          name: (identifier))
         type: (type_identifier))
       (fn_parameter
-        name: (identifier)
+        pattern: (binding_pattern
+          name: (identifier))
         type: (fn_type
           (type_identifier)
           return_type: (type_identifier))))
@@ -62,7 +65,8 @@ export let map = extern "Std/List.map": fn<T, U>([T], fn(T) U) [U]
 (source_file
   (export_statement
     (let_binding
-      name: (identifier)
+      pattern: (binding_pattern
+        name: (identifier))
       value: (extern_expression
         name: (string
           (string_content))
@@ -90,7 +94,8 @@ let ids: List<Int> = xs
 
 (source_file
   (let_binding
-    name: (identifier)
+    pattern: (binding_pattern
+      name: (identifier))
     type: (type_application
       base: (type_identifier)
       (type_arguments
@@ -131,7 +136,8 @@ let m: Std.Map<Str, Int>.Entry = e
 
 (source_file
   (let_binding
-    name: (identifier)
+    pattern: (binding_pattern
+      name: (identifier))
     type: (type_property_access
       (type_application
         base: (type_property_access
@@ -183,7 +189,8 @@ let x: Box<Int>? = nil
 
 (source_file
   (let_binding
-    name: (identifier)
+    pattern: (binding_pattern
+      name: (identifier))
     type: (optional_type
       (type_application
         base: (type_identifier)
@@ -202,7 +209,8 @@ let y = a < b
 
 (source_file
   (let_binding
-    name: (identifier)
+    pattern: (binding_pattern
+      name: (identifier))
     value: (type_cast
       expression: (identifier)
       type: (type_application
@@ -210,7 +218,8 @@ let y = a < b
         (type_arguments
           (type_identifier)))))
   (let_binding
-    name: (identifier)
+    pattern: (binding_pattern
+      name: (identifier))
     value: (binary_expression
       left: (identifier)
       right: (identifier))))

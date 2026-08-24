@@ -51,7 +51,8 @@ with (a) let x = 1; x
     subject: (identifier)
     body: (let_expression
       (let_binding
-        name: (identifier)
+        pattern: (binding_pattern
+          name: (identifier))
         value: (integer))
       body: (identifier))))
 
@@ -80,7 +81,8 @@ let x = withParent(node)
 
 (source_file
   (let_binding
-    name: (identifier)
+    pattern: (binding_pattern
+      name: (identifier))
     value: (call_expression
       function: (identifier)
       (identifier))))
@@ -96,7 +98,8 @@ let x = 1; x + 1
 (source_file
   (let_expression
     (let_binding
-      name: (identifier)
+      pattern: (binding_pattern
+        name: (identifier))
       value: (integer))
     body: (binary_expression
       left: (identifier)
@@ -114,10 +117,12 @@ fn(x: Int, y: Int) x + y
   (fn_expression
     (fn_parameters
       (fn_parameter
-        name: (identifier)
+        pattern: (binding_pattern
+          name: (identifier))
         type: (type_identifier))
       (fn_parameter
-        name: (identifier)
+        pattern: (binding_pattern
+          name: (identifier))
         type: (type_identifier)))
     body: (binary_expression
       left: (identifier)
@@ -134,26 +139,31 @@ export let pick = fn(x, y: Int) x
 
 (source_file
   (let_binding
-    name: (identifier)
+    pattern: (binding_pattern
+      name: (identifier))
     type: (fn_type
       (type_identifier)
       return_type: (type_identifier))
     value: (fn_expression
       (fn_parameters
         (fn_parameter
-          name: (identifier)))
+          pattern: (binding_pattern
+            name: (identifier))))
       body: (binary_expression
         left: (identifier)
         right: (integer))))
   (export_statement
     (let_binding
-      name: (identifier)
+      pattern: (binding_pattern
+        name: (identifier))
       value: (fn_expression
         (fn_parameters
           (fn_parameter
-            name: (identifier))
+            pattern: (binding_pattern
+              name: (identifier)))
           (fn_parameter
-            name: (identifier)
+            pattern: (binding_pattern
+              name: (identifier))
             type: (type_identifier)))
         body: (identifier)))))
 
@@ -172,7 +182,8 @@ fn<T>(x: T) x
         name: (identifier)))
     (fn_parameters
       (fn_parameter
-        name: (identifier)
+        pattern: (binding_pattern
+          name: (identifier))
         type: (type_identifier)))
     body: (identifier)))
 
@@ -238,7 +249,8 @@ let name = user?.name ?? "anonymous"
 
 (source_file
   (let_binding
-    name: (identifier)
+    pattern: (binding_pattern
+      name: (identifier))
     value: (binary_expression
       left: (property_access
         object: (identifier)
@@ -258,7 +270,8 @@ export let r = x?.name
 
 (source_file
   (let_binding
-    name: (identifier)
+    pattern: (binding_pattern
+      name: (identifier))
     type: (optional_type
       (record_type
         (record_type_field
@@ -267,7 +280,8 @@ export let r = x?.name
     value: (nil))
   (export_statement
     (let_binding
-      name: (identifier)
+      pattern: (binding_pattern
+        name: (identifier))
       value: (property_access
         object: (identifier)
         (optional_chain)
@@ -445,7 +459,8 @@ let mode = .prod
 
 (source_file
   (let_binding
-    name: (identifier)
+    pattern: (binding_pattern
+      name: (identifier))
     value: (atom
       label: (identifier))))
 
@@ -459,7 +474,8 @@ let x = f(.a, .b)
 
 (source_file
   (let_binding
-    name: (identifier)
+    pattern: (binding_pattern
+      name: (identifier))
     value: (call_expression
       function: (identifier)
       (atom
@@ -490,7 +506,8 @@ let tagged = .ok(1, "hi")
 
 (source_file
   (let_binding
-    name: (identifier)
+    pattern: (binding_pattern
+      name: (identifier))
     value: (atom
       label: (identifier)
       (atom_payload
@@ -508,9 +525,144 @@ let nested = .wrap(.inner)
 
 (source_file
   (let_binding
-    name: (identifier)
+    pattern: (binding_pattern
+      name: (identifier))
     value: (atom
       label: (identifier)
       (atom_payload
         (atom
           label: (identifier))))))
+
+================
+Let expression destructuring a variant pattern
+================
+
+let .pair(a, b) = makePair(); a + b
+
+---
+
+(source_file
+  (let_expression
+    (let_binding
+      pattern: (variant_pattern
+        label: (identifier)
+        (pattern_payload
+          (binding_pattern
+            name: (identifier))
+          (binding_pattern
+            name: (identifier))))
+      value: (call_expression
+        function: (identifier)))
+    body: (binary_expression
+      left: (identifier)
+      right: (identifier))))
+
+================
+Let expression with a wildcard binder
+================
+
+let _ = log("hi"); 1
+
+---
+
+(source_file
+  (let_expression
+    (let_binding
+      pattern: (wildcard_pattern)
+      value: (call_expression
+        function: (identifier)
+        (string
+          (string_content))))
+    body: (integer)))
+
+================
+Let expression with a nested pattern and an annotation after it
+================
+
+let .some(.pair(a, _)): Pair? = lookup(); a
+
+---
+
+(source_file
+  (let_expression
+    (let_binding
+      pattern: (variant_pattern
+        label: (identifier)
+        (pattern_payload
+          (variant_pattern
+            label: (identifier)
+            (pattern_payload
+              (binding_pattern
+                name: (identifier))
+              (wildcard_pattern)))))
+      type: (optional_type
+        (type_identifier))
+      value: (call_expression
+        function: (identifier)))
+    body: (identifier)))
+
+================
+Let expression with a nil binder
+================
+
+let nil = probe(); 1
+
+---
+
+(source_file
+  (let_expression
+    (let_binding
+      pattern: (nil_pattern)
+      value: (call_expression
+        function: (identifier)))
+    body: (integer)))
+
+================
+Function expression with pattern parameters
+================
+
+fn(.pair(a, b): Pair, _, nil) a + b
+
+---
+
+(source_file
+  (fn_expression
+    (fn_parameters
+      (fn_parameter
+        pattern: (variant_pattern
+          label: (identifier)
+          (pattern_payload
+            (binding_pattern
+              name: (identifier))
+            (binding_pattern
+              name: (identifier))))
+        type: (type_identifier))
+      (fn_parameter
+        pattern: (wildcard_pattern))
+      (fn_parameter
+        pattern: (nil_pattern)))
+    body: (binary_expression
+      left: (identifier)
+      right: (identifier))))
+
+================
+Function expression with an untyped pattern parameter
+================
+
+apply(fn(.some(x)) x, o)
+
+---
+
+(source_file
+  (call_expression
+    function: (identifier)
+    (fn_expression
+      (fn_parameters
+        (fn_parameter
+          pattern: (variant_pattern
+            label: (identifier)
+            (pattern_payload
+              (binding_pattern
+                name: (identifier))))))
+      body: (identifier))
+    (identifier)))

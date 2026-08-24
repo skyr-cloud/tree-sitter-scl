@@ -8,7 +8,8 @@ let MyError = exception
 
 (source_file
   (let_binding
-    name: (identifier)
+    pattern: (binding_pattern
+      name: (identifier))
     value: (exception_expression)))
 
 ================
@@ -21,7 +22,8 @@ let ParseError = exception(Str)
 
 (source_file
   (let_binding
-    name: (identifier)
+    pattern: (binding_pattern
+      name: (identifier))
     value: (exception_expression
       (type_identifier))))
 

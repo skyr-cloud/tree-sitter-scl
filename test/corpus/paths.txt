@@ -8,7 +8,8 @@ let x = ./foo/bar
 
 (source_file
   (let_binding
-    name: (identifier)
+    pattern: (binding_pattern
+      name: (identifier))
     value: (path_expression)))
 
 ================================================================================
@@ -21,7 +22,8 @@ let x = ../foo/bar
 
 (source_file
   (let_binding
-    name: (identifier)
+    pattern: (binding_pattern
+      name: (identifier))
     value: (path_expression)))
 
 ================================================================================
@@ -34,7 +36,8 @@ let x = ..
 
 (source_file
   (let_binding
-    name: (identifier)
+    pattern: (binding_pattern
+      name: (identifier))
     value: (path_expression)))
 
 ================================================================================
@@ -47,7 +50,8 @@ let x = ./config.json
 
 (source_file
   (let_binding
-    name: (identifier)
+    pattern: (binding_pattern
+      name: (identifier))
     value: (path_expression)))
 
 ================================================================================
@@ -60,7 +64,8 @@ let x = ./dir/"file with spaces.txt"
 
 (source_file
   (let_binding
-    name: (identifier)
+    pattern: (binding_pattern
+      name: (identifier))
     value: (path_expression)))
 
 ================================================================================
@@ -73,7 +78,8 @@ let x = ../../foo/bar/baz.txt
 
 (source_file
   (let_binding
-    name: (identifier)
+    pattern: (binding_pattern
+      name: (identifier))
     value: (path_expression)))
 
 ================================================================================
@@ -86,7 +92,8 @@ let x = ./my-dir/@scope/pkg
 
 (source_file
   (let_binding
-    name: (identifier)
+    pattern: (binding_pattern
+      name: (identifier))
     value: (path_expression)))
 
 ================================================================================
@@ -99,7 +106,8 @@ let x = /Dockerfile
 
 (source_file
   (let_binding
-    name: (identifier)
+    pattern: (binding_pattern
+      name: (identifier))
     value: (path_expression)))
 
 ================================================================================
@@ -112,7 +120,8 @@ let x = /absolute/path/to/file.txt
 
 (source_file
   (let_binding
-    name: (identifier)
+    pattern: (binding_pattern
+      name: (identifier))
     value: (path_expression)))
 
 ================================================================================
@@ -125,7 +134,8 @@ let x = /
 
 (source_file
   (let_binding
-    name: (identifier)
+    pattern: (binding_pattern
+      name: (identifier))
     value: (path_expression)))
 
 ================================================================================
@@ -138,7 +148,8 @@ let x = a / b
 
 (source_file
   (let_binding
-    name: (identifier)
+    pattern: (binding_pattern
+      name: (identifier))
     value: (binary_expression
       left: (identifier)
       right: (identifier))))

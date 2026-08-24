@@ -34,7 +34,7 @@
 (atom label: (identifier) @constant)
 (enum_variant label: (identifier) @constant)
 
-; Switch patterns
+; Patterns — a `case` arm, a `let` binder and a function parameter alike
 (variant_pattern label: (identifier) @constant)
 (nil_pattern) @constant.builtin
 (wildcard_pattern) @variable.builtin
@@ -106,10 +106,13 @@
   name: (identifier) @property)
 
 ; Variables
-(let_binding
-  name: (identifier) @variable)
+;
+; A `let` binder and a function parameter are patterns, so their names come
+; from the binding-pattern rule above; a parameter's own name refines that to
+; the parameter highlight.
 (fn_parameter
-  name: (identifier) @variable.parameter)
+  pattern: (binding_pattern
+    name: (identifier) @variable.parameter))
 (list_for_item
   variable: (identifier) @variable)
 (dict_for_item

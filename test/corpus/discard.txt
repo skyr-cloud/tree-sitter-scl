@@ -9,7 +9,8 @@ export let x = (a; b; c)
 (source_file
   (export_statement
     (let_binding
-      name: (identifier)
+      pattern: (binding_pattern
+        name: (identifier))
       value: (parenthesized_expression
         (discard_expression
           left: (identifier)
@@ -28,7 +29,8 @@ export let x = (a + b; c * d)
 (source_file
   (export_statement
     (let_binding
-      name: (identifier)
+      pattern: (binding_pattern
+        name: (identifier))
       value: (parenthesized_expression
         (discard_expression
           left: (binary_expression
@@ -49,7 +51,8 @@ export let x = f(a; b, c)
 (source_file
   (export_statement
     (let_binding
-      name: (identifier)
+      pattern: (binding_pattern
+        name: (identifier))
       value: (call_expression
         function: (identifier)
         (discard_expression
@@ -68,7 +71,8 @@ export let x = [a; b, "{c; d}"]
 (source_file
   (export_statement
     (let_binding
-      name: (identifier)
+      pattern: (binding_pattern
+        name: (identifier))
       value: (list
         (discard_expression
           left: (identifier)
@@ -90,7 +94,8 @@ export let x = (if (c) A(); B())
 (source_file
   (export_statement
     (let_binding
-      name: (identifier)
+      pattern: (binding_pattern
+        name: (identifier))
       value: (parenthesized_expression
         (if_expression
           condition: (identifier)
@@ -111,12 +116,14 @@ export let double = (fn(n: Int) n; n * 2)
 (source_file
   (export_statement
     (let_binding
-      name: (identifier)
+      pattern: (binding_pattern
+        name: (identifier))
       value: (parenthesized_expression
         (fn_expression
           (fn_parameters
             (fn_parameter
-              name: (identifier)
+              pattern: (binding_pattern
+                name: (identifier))
               type: (type_identifier)))
           body: (discard_expression
             left: (identifier)
@@ -135,7 +142,8 @@ export let x = (switch s case .a: A(); B())
 (source_file
   (export_statement
     (let_binding
-      name: (identifier)
+      pattern: (binding_pattern
+        name: (identifier))
       value: (parenthesized_expression
         (switch_expression
           subject: (identifier)
@@ -159,7 +167,8 @@ export let x = (with (a) A(); B())
 (source_file
   (export_statement
     (let_binding
-      name: (identifier)
+      pattern: (binding_pattern
+        name: (identifier))
       value: (parenthesized_expression
         (with_expression
           subject: (identifier)
@@ -181,7 +190,8 @@ Container(port)
 (source_file
   (let_expression
     (let_binding
-      name: (identifier)
+      pattern: (binding_pattern
+        name: (identifier))
       value: (if_expression
         condition: (identifier)
         consequence: (identifier)
@@ -205,10 +215,12 @@ let x = let y = a; b; c
 (source_file
   (let_expression
     (let_binding
-      name: (identifier)
+      pattern: (binding_pattern
+        name: (identifier))
       value: (let_expression
         (let_binding
-          name: (identifier)
+          pattern: (binding_pattern
+            name: (identifier))
           value: (identifier))
         body: (identifier)))
     body: (identifier)))
@@ -225,7 +237,8 @@ C()
 (source_file
   (let_expression
     (let_binding
-      name: (identifier)
+      pattern: (binding_pattern
+        name: (identifier))
       value: (parenthesized_expression
         (discard_expression
           left: (call_expression
@@ -246,7 +259,8 @@ export let x = try (A(); B()) catch E(e): c
 (source_file
   (export_statement
     (let_binding
-      name: (identifier)
+      pattern: (binding_pattern
+        name: (identifier))
       value: (try_expression
         body: (parenthesized_expression
           (discard_expression
@@ -270,7 +284,8 @@ let x = if (c) A(); rest
 (source_file
   (let_expression
     (let_binding
-      name: (identifier)
+      pattern: (binding_pattern
+        name: (identifier))
       value: (if_expression
         condition: (identifier)
         consequence: (call_expression
@@ -288,11 +303,13 @@ let f = fn(n: Int) n; f(1)
 (source_file
   (let_expression
     (let_binding
-      name: (identifier)
+      pattern: (binding_pattern
+        name: (identifier))
       value: (fn_expression
         (fn_parameters
           (fn_parameter
-            name: (identifier)
+            pattern: (binding_pattern
+              name: (identifier))
             type: (type_identifier)))
         body: (identifier)))
     body: (call_expression
@@ -310,7 +327,8 @@ let x = raise E("m"); rest
 (source_file
   (let_expression
     (let_binding
-      name: (identifier)
+      pattern: (binding_pattern
+        name: (identifier))
       value: (raise_expression
         value: (call_expression
           function: (identifier)
@@ -329,7 +347,8 @@ let x = switch s case .a: A(); rest
 (source_file
   (let_expression
     (let_binding
-      name: (identifier)
+      pattern: (binding_pattern
+        name: (identifier))
       value: (switch_expression
         subject: (identifier)
         (case_clause
@@ -350,7 +369,8 @@ let x = try A() catch E(e): B(); rest
 (source_file
   (let_expression
     (let_binding
-      name: (identifier)
+      pattern: (binding_pattern
+        name: (identifier))
       value: (try_expression
         body: (call_expression
           function: (identifier))
@@ -372,7 +392,8 @@ let x = with (a) A(); rest
 (source_file
   (let_expression
     (let_binding
-      name: (identifier)
+      pattern: (binding_pattern
+        name: (identifier))
       value: (with_expression
         subject: (identifier)
         body: (call_expression
@@ -390,7 +411,8 @@ let x = with (A(); B()) c; rest
 (source_file
   (let_expression
     (let_binding
-      name: (identifier)
+      pattern: (binding_pattern
+        name: (identifier))
       value: (with_expression
         subject: (discard_expression
           left: (call_expression
@@ -411,7 +433,8 @@ let x = A(); B()
 (source_file
   (let_expression
     (let_binding
-      name: (identifier)
+      pattern: (binding_pattern
+        name: (identifier))
       value: (call_expression
         function: (identifier)))
     body: (call_expression

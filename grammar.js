@@ -53,8 +53,10 @@ module.exports = grammar({
     ...bothFlavors($, ["binary_expression", "call_expression"]),
     [$._atom_expression, $._type_expression_base],
     // An untyped parameter makes `fn(a, …` ambiguous between a `fn` expression
-    // and a `fn` type until the closing paren's continuation settles it.
-    [$.fn_parameter, $._type_expression_base],
+    // and a `fn` type until the closing paren's continuation settles it. The
+    // ambiguity is over the lone identifier: a parameter's binding pattern, or
+    // the type it names.
+    [$.binding_pattern, $._type_expression_base],
     [$.record, $.record_type],
     [$.if_expression, $._list_item],
     [$.binary_expression, $.path_expression],
@@ -128,8 +130,15 @@ module.exports = grammar({
     // A binding's value is always a reservation context: the `;` that may
     // follow it closes the binding (inline `let`) or is an error (module-level
     // declaration) — it is never the binding's own discard operator.
+    //
+    // The bound slot is a pattern, so a binding destructures what it binds; a
+    // plain name is the degenerate binding pattern. The optional type
+    // annotation follows the pattern and is never part of it. A module-level
+    // declaration binds exactly one name, but that is a rule about meaning
+    // rather than shape — the reference parser parses a pattern there and then
+    // rejects it — so both positions share this rule.
     let_binding: ($) =>
-      seq("let", field("name", $.identifier), optional(seq(":", field("type", $._type_expression))), "=", field("value", $._reserved_core_expression)),
+      seq("let", field("pattern", $._pattern), optional(seq(":", field("type", $._type_expression))), "=", field("value", $._reserved_core_expression)),
 
     export_statement: ($) => seq("export", $.let_binding),
 
@@ -203,11 +212,13 @@ module.exports = grammar({
 
     fn_parameters: ($) => commaSep1($.fn_parameter),
 
-    // A parameter's type annotation is optional: an untyped parameter is legal
-    // wherever an expectation supplies its type, as in `fn(x) x + 1` checked
-    // against `fn(Int) Int`.
+    // A parameter binds a pattern, so it destructures its argument; a plain
+    // name is the degenerate binding pattern. The type annotation follows the
+    // pattern and is never part of it, and is optional: an untyped parameter is
+    // legal wherever an expectation supplies its type, as in `fn(x) x + 1`
+    // checked against `fn(Int) Int`.
     fn_parameter: ($) =>
-      seq(field("name", $.identifier), optional(seq(":", field("type", $._type_expression)))),
+      seq(field("pattern", $._pattern), optional(seq(":", field("type", $._type_expression)))),
 
     extern_expression: ($) =>
       seq("extern", field("name", $.string), ":", field("type", $._type_expression)),

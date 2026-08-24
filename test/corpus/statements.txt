@@ -96,7 +96,8 @@ let x = 42
 
 (source_file
   (let_binding
-    name: (identifier)
+    pattern: (binding_pattern
+      name: (identifier))
     value: (integer)))
 
 ================
@@ -109,7 +110,8 @@ let x: Int = 42
 
 (source_file
   (let_binding
-    name: (identifier)
+    pattern: (binding_pattern
+      name: (identifier))
     type: (type_identifier)
     value: (integer)))
 
@@ -124,7 +126,8 @@ export let name = "hello"
 (source_file
   (export_statement
     (let_binding
-      name: (identifier)
+      pattern: (binding_pattern
+        name: (identifier))
       value: (string
         (string_content)))))
 
@@ -228,7 +231,8 @@ let x = 1
         (boolean)
         (nil)))
     (let_binding
-      name: (identifier)
+      pattern: (binding_pattern
+        name: (identifier))
       value: (integer))))
 
 ================
@@ -248,5 +252,47 @@ Stacked annotations
         name: (identifier))
       (export_statement
         (let_binding
-          name: (identifier)
+          pattern: (binding_pattern
+            name: (identifier))
           value: (integer))))))
+
+================
+Let declaration with a pattern (a global binding the reference parser rejects)
+================
+
+let .pair(a, b) = makePair()
+
+---
+
+(source_file
+  (let_binding
+    pattern: (variant_pattern
+      label: (identifier)
+      (pattern_payload
+        (binding_pattern
+          name: (identifier))
+        (binding_pattern
+          name: (identifier))))
+    value: (call_expression
+      function: (identifier))))
+
+================
+Export let declaration with a pattern
+================
+
+export let .pair(a, b) = makePair()
+
+---
+
+(source_file
+  (export_statement
+    (let_binding
+      pattern: (variant_pattern
+        label: (identifier)
+        (pattern_payload
+          (binding_pattern
+            name: (identifier))
+          (binding_pattern
+            name: (identifier))))
+      value: (call_expression
+        function: (identifier)))))
