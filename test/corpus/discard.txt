@@ -452,7 +452,8 @@ export let x = A(); B()
 (source_file
   (export_statement
     (let_binding
-      name: (identifier)
+      pattern: (binding_pattern
+        name: (identifier))
       value: (call_expression
         function: (identifier))))
   (ERROR))
@@ -469,7 +470,8 @@ export let x = if (c) A(); B()
 (source_file
   (export_statement
     (let_binding
-      name: (identifier)
+      pattern: (binding_pattern
+        name: (identifier))
       value: (if_expression
         condition: (identifier)
         consequence: (call_expression
