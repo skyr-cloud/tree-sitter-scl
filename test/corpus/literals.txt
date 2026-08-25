@@ -102,3 +102,22 @@ Comments
 (source_file
   (comment)
   (integer))
+
+================================================================================
+Doc comments are distinct from plain comments
+================================================================================
+
+//! Module doc.
+/// Declaration doc.
+let x = 1 // plain
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (inner_doc_comment)
+  (doc_comment)
+  (let_binding
+    pattern: (binding_pattern
+      name: (identifier))
+    value: (integer))
+  (comment))

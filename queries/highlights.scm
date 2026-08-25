@@ -52,6 +52,8 @@
 
 ; Comments
 (comment) @comment
+(doc_comment) @comment.documentation
+(inner_doc_comment) @comment.documentation
 
 ; Operators
 (binary_expression

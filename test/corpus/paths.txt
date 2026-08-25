@@ -153,3 +153,31 @@ let x = a / b
     value: (binary_expression
       left: (identifier)
       right: (identifier))))
+
+================================================================================
+Standalone current-directory path
+================================================================================
+
+let here = .
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (let_binding
+    pattern: (binding_pattern
+      name: (identifier))
+    value: (path_expression)))
+
+================================================================================
+Absolute path with a quoted segment
+================================================================================
+
+let x = /"dir with spaces"/file.txt
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (let_binding
+    pattern: (binding_pattern
+      name: (identifier))
+    value: (path_expression)))

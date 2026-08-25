@@ -6869,6 +6869,11 @@
     "extra": true
   },
   {
+    "type": "doc_comment",
+    "named": true,
+    "extra": true
+  },
+  {
     "type": "else",
     "named": false
   },
@@ -6923,6 +6928,11 @@
   {
     "type": "in",
     "named": false
+  },
+  {
+    "type": "inner_doc_comment",
+    "named": true,
+    "extra": true
   },
   {
     "type": "integer",

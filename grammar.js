@@ -42,7 +42,7 @@ const FLAVORED = [
 module.exports = grammar({
   name: "scl",
 
-  extras: ($) => [/\s/, $.comment],
+  extras: ($) => [/\s/, $.comment, $.doc_comment, $.inner_doc_comment],
 
   word: ($) => $.identifier,
 
@@ -63,7 +63,6 @@ module.exports = grammar({
     [$.record_pattern, $.record_type],
     [$.record, $.record_type],
     [$.if_expression, $._list_item],
-    [$.binary_expression, $.path_expression],
   ],
 
   rules: {
@@ -335,11 +334,21 @@ module.exports = grammar({
         prec.right(-1, seq("/", $._path_segment, repeat(seq("/", $._path_segment)))),
         // Standalone root path
         prec(-2, "/"),
+        // Standalone current-directory path. The same `.` token an atom or a
+        // property access begins with; the parser keeps it a path exactly when
+        // nothing joins it.
+        prec(-2, "."),
       );
     },
 
+    // One segment of an absolute path, immediately after its `/`: a bare run
+    // of segment characters, or a quoted segment for names those characters
+    // cannot spell (`/"file with spaces.txt"/x`), as in relative paths.
     _path_segment: ($) =>
-      token.immediate(/[\w.@-]+/),
+      choice(
+        token.immediate(/[\w.@-]+/),
+        token.immediate(seq('"', /[^"]*/, '"')),
+      ),
 
     // ── Collections ────────────────────────────────────────────
 
@@ -562,6 +571,15 @@ module.exports = grammar({
     nil: ($) => "nil",
 
     comment: ($) => token(seq("//", /.*/)),
+
+    // Doc comments are distinct tokens in the reference lexer: `///` documents
+    // the declaration, record field, or enum variant that follows it, and
+    // `//!` documents the enclosing module. Both are trivia to the tree (the
+    // reference parser attaches them semantically; an editor grammar need
+    // not), but each keeps its own node so tooling can style and query them.
+    doc_comment: ($) => token(prec(1, seq("///", /.*/))),
+
+    inner_doc_comment: ($) => token(prec(2, seq("//!", /.*/))),
   },
 });
 
