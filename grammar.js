@@ -57,6 +57,10 @@ module.exports = grammar({
     // ambiguity is over the lone identifier: a parameter's binding pattern, or
     // the type it names.
     [$.binding_pattern, $._type_expression_base],
+    // The same parameter-list ambiguity over a braced form: `fn({…}, …` is a
+    // parameter's record pattern or the record type it names, until the
+    // continuation settles which flavor of `fn` this is.
+    [$.record_pattern, $.record_type],
     [$.record, $.record_type],
     [$.if_expression, $._list_item],
     [$.binary_expression, $.path_expression],
@@ -223,13 +227,14 @@ module.exports = grammar({
     extern_expression: ($) =>
       seq("extern", field("name", $.string), ":", field("type", $._type_expression)),
 
-    // The v1 pattern set: a variant pattern `.name(<pat>, …)`, a `nil` pattern,
-    // a wildcard `_`, and a variable binding. Deferred forms (literals, ranges,
-    // list/cons, @-bindings, guards) are rejected by the reference parser and
-    // are not modelled here.
+    // The accepted pattern set: a variant pattern `.name(<pat>, …)`, a record
+    // pattern `{a, b: <pat>}`, a `nil` pattern, a wildcard `_`, and a variable
+    // binding. Deferred forms (literals, ranges, list/cons, @-bindings,
+    // guards) are rejected by the reference parser and are not modelled here.
     _pattern: ($) =>
       choice(
         $.variant_pattern,
+        $.record_pattern,
         $.nil_pattern,
         $.wildcard_pattern,
         $.binding_pattern,
@@ -242,6 +247,18 @@ module.exports = grammar({
       seq(".", field("label", $.identifier), optional($.pattern_payload)),
 
     pattern_payload: ($) => seq("(", commaSep1($._pattern), ")"),
+
+    // A record pattern `{a, b: <pat>}`. The shorthand field `a` binds the
+    // field's value to its own name, exactly as a record literal's shorthand
+    // field reads one; `{}` matches any record.
+    record_pattern: ($) =>
+      seq("{", optional(seq(commaSep1($.record_field_pattern), optional(","))), "}"),
+
+    record_field_pattern: ($) =>
+      seq(
+        field("name", $.identifier),
+        optional(seq(":", field("pattern", $._pattern))),
+      ),
 
     wildcard_pattern: ($) => "_",
 

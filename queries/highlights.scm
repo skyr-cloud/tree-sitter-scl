@@ -104,6 +104,14 @@
   name: (identifier) @property)
 (record_type_field
   name: (identifier) @property)
+; A record pattern's explicit field names a property; the shorthand field is a
+; binder wearing the field's name, so it highlights as the variable it binds.
+(record_field_pattern
+  name: (identifier) @property
+  pattern: (_))
+(record_field_pattern
+  !pattern
+  name: (identifier) @variable)
 
 ; Variables
 ;

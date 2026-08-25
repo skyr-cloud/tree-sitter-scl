@@ -108,3 +108,61 @@ switch x
 (source_file
   (switch_expression
     subject: (identifier)))
+
+================================================================================
+Switch with record patterns: shorthand, nested, and empty
+================================================================================
+
+switch server
+	case {name, status: .active(port)}: port
+	case {}: 0
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (switch_expression
+    subject: (identifier)
+    (case_clause
+      pattern: (record_pattern
+        (record_field_pattern
+          name: (identifier))
+        (record_field_pattern
+          name: (identifier)
+          pattern: (variant_pattern
+            label: (identifier)
+            (pattern_payload
+              (binding_pattern
+                name: (identifier))))))
+      body: (identifier))
+    (case_clause
+      pattern: (record_pattern)
+      body: (integer))))
+
+================================================================================
+Record pattern in a let binding and a parameter
+================================================================================
+
+let {a, b: c} = r;
+fn({a}: T) a
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (let_expression
+    (let_binding
+      pattern: (record_pattern
+        (record_field_pattern
+          name: (identifier))
+        (record_field_pattern
+          name: (identifier)
+          pattern: (binding_pattern
+            name: (identifier))))
+      value: (identifier))
+    body: (fn_expression
+      (fn_parameters
+        (fn_parameter
+          pattern: (record_pattern
+            (record_field_pattern
+              name: (identifier)))
+          type: (type_identifier)))
+      body: (identifier))))

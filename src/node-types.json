@@ -1046,6 +1046,10 @@
             "named": true
           },
           {
+            "type": "record_pattern",
+            "named": true
+          },
+          {
             "type": "variant_pattern",
             "named": true
           },
@@ -2606,6 +2610,10 @@
             "named": true
           },
           {
+            "type": "record_pattern",
+            "named": true
+          },
+          {
             "type": "variant_pattern",
             "named": true
           },
@@ -3544,6 +3552,10 @@
           },
           {
             "type": "nil_pattern",
+            "named": true
+          },
+          {
+            "type": "record_pattern",
             "named": true
           },
           {
@@ -4875,6 +4887,10 @@
           "named": true
         },
         {
+          "type": "record_pattern",
+          "named": true
+        },
+        {
           "type": "variant_pattern",
           "named": true
         },
@@ -5296,6 +5312,63 @@
           }
         ]
       }
+    }
+  },
+  {
+    "type": "record_field_pattern",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      },
+      "pattern": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "binding_pattern",
+            "named": true
+          },
+          {
+            "type": "nil_pattern",
+            "named": true
+          },
+          {
+            "type": "record_pattern",
+            "named": true
+          },
+          {
+            "type": "variant_pattern",
+            "named": true
+          },
+          {
+            "type": "wildcard_pattern",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "record_pattern",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "record_field_pattern",
+          "named": true
+        }
+      ]
     }
   },
   {

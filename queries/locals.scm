@@ -18,6 +18,11 @@
   binding: (identifier) @local.definition)
 (binding_pattern
   name: (identifier) @local.definition)
+; A record pattern's shorthand field (`{a}`) is a binder with no
+; binding-pattern node of its own; the explicit form's binder is covered above.
+(record_field_pattern
+  !pattern
+  name: (identifier) @local.definition)
 
 ; References
 (identifier) @local.reference
